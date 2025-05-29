@@ -1,6 +1,6 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/checkout/db.php';
-require_once $_SERVER['DOCUMENT_ROOT'] . '/checkout/check_admin.php'; // Apenas administradores podem gerenciar permissões
+require_once '../db.php';
+require_once '../check_admin.php'; // Apenas administradores podem gerenciar permissões
 
 // Processar o formulário de atualização de permissões
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_id'])) {
@@ -40,7 +40,7 @@ while ($row = mysqli_fetch_assoc($result_categorias)) {
 
 // Título da página
 $pageTitle = "Gerenciar Permissões de Categorias";
-include_once $_SERVER['DOCUMENT_ROOT'] . '/checkout/header.php';
+include_once '../header.php';
 ?>
 
 <div class="container mt-4">
@@ -158,4 +158,4 @@ function desmarcarTodas(usuarioId) {
 }
 </script>
 
-<?php include_once $_SERVER['DOCUMENT_ROOT'] . '/checkout/footer.php'; ?> 
+<?php include_once '../footer.php'; ?> 
