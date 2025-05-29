@@ -25,7 +25,15 @@ ErrorDocument 404 /error404.php
 # URL Rewriting
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /
+    
+    # Remover 'checkout' da URL se presente
+    RewriteCond %{THE_REQUEST} /checkout/([^\s?]*) [NC]
+    RewriteRule ^ /%1 [L,R=301,NE]
+    
+    # Redirecionar internamente requisições para a pasta checkout
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ /checkout/$1 [L]
     
     # Redirect to HTTPS
     RewriteCond %{HTTPS} off
