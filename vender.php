@@ -7,9 +7,28 @@ if ($_SESSION['nivel'] === 'administrador' && (!isset($_SESSION['caixa_numero'])
     $_SESSION['caixa_numero'] = 999; // Número padrão para admin
 }
 
-// Get products
-$sql = "SELECT * FROM produtos ORDER BY nome";
-$result = mysqli_query($conn, $sql);
+// Get products - Filtrar por categorias permitidas para o usuário
+if ($_SESSION['nivel'] === 'administrador') {
+    // Administradores veem todos os produtos
+    $sql = "SELECT p.*, c.nome as categoria_nome 
+            FROM produtos p 
+            LEFT JOIN categorias c ON p.categoria_id = c.id 
+            ORDER BY p.nome";
+    $result = mysqli_query($conn, $sql);
+} else {
+    // Operadores veem apenas produtos das categorias permitidas
+    $sql = "SELECT p.*, c.nome as categoria_nome 
+            FROM produtos p 
+            LEFT JOIN categorias c ON p.categoria_id = c.id 
+            INNER JOIN permissoes_categorias pc ON c.nome = pc.categoria 
+            WHERE pc.usuario_id = ? 
+            ORDER BY p.nome";
+    
+    $stmt = mysqli_prepare($conn, $sql);
+    mysqli_stmt_bind_param($stmt, "i", $_SESSION['usuario_id']);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+}
 
 include 'header.php';
 
@@ -33,35 +52,102 @@ if (isset($_SESSION['message']) && isset($_SESSION['message_type'])) {
 }
 ?>
 
+<!-- Header Section -->
+<div class="header-section mb-4">
+    <div class="row g-0">
+        <div class="col-md-8">
+            <div class="main-header p-4 rounded-start" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
+                <div class="d-flex align-items-center">
+                    <div class="header-icon me-4">
+                        <i class="fas fa-cash-register fa-2x text-white"></i>
+                    </div>
+                    <div class="text-white">
+                        <h3 class="mb-1 fw-bold">PONTO DE VENDA</h3>
+                        <p class="mb-0 opacity-75">
+                            <?php if($_SESSION['nivel'] === 'administrador'): ?>
+                                <i class="fas fa-user-shield me-1"></i> Admin - Caixa <?php echo $_SESSION['caixa_numero']; ?>
+                            <?php else: ?>
+                                <i class="fas fa-cash-register me-1"></i> Operador - Caixa <?php echo $_SESSION['caixa_numero']; ?>
+                            <?php endif; ?>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-header h-100 p-4 rounded-end" style="background: #2a5298;">
+                <div class="d-flex flex-column justify-content-center h-100">
+                    <div class="stat-item mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon me-3">
+                                <i class="fas fa-clock fa-lg text-white"></i>
+                            </div>
+                            <div>
+                                <small class="text-white opacity-75 d-block">HORÁRIO ATUAL</small>
+                                <span id="current-time" class="text-white fw-bold"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon me-3">
+                                <i class="fas fa-calendar fa-lg text-white"></i>
+                            </div>
+                            <div>
+                                <small class="text-white opacity-75 d-block">DATA</small>
+                                <span id="current-date" class="text-white fw-bold"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <!-- Products Column -->
     <div class="col-lg-8 order-2 order-lg-1">
-        <div class="card mb-4 products-container">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">Produtos</h5>
-                <div class="d-flex align-items-center">
-                    <button class="btn btn-sm btn-outline-primary d-lg-none me-2" id="toggle-cart-btn">
-                        <i class="fas fa-shopping-cart"></i> <span class="cart-counter">0</span>
-                    </button>
+        <div class="card mb-4 products-container shadow">
+            <div class="card-header bg-white border-bottom-0 py-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0 d-flex align-items-center">
+                        <span class="header-icon-sm me-2 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-box-open text-primary"></i>
+                        </span>
+                        <span class="fw-bold">PRODUTOS DISPONÍVEIS</span>
+                    </h5>
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-sm btn-outline-primary d-lg-none me-2" id="toggle-cart-btn">
+                            <i class="fas fa-shopping-cart"></i> <span class="cart-counter badge bg-danger">0</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="search-container">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0 ps-0" id="search-product" placeholder="Buscar produto...">
+                        <button class="btn btn-outline-secondary d-none d-md-block" type="button" id="clear-search">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="card-body">
-                <div class="input-group mb-3">
-                    <span class="input-group-text">
-                        <i class="fas fa-search"></i>
-                    </span>
-                    <input type="text" class="form-control" id="search-product" placeholder="Buscar produto...">
-                    <button class="btn btn-outline-secondary d-none d-md-block" type="button" id="clear-search">
-                        <i class="fas fa-times"></i>
+                <!-- Categories quick filter -->
+                <div class="categories-filter d-flex flex-nowrap overflow-auto mb-4 pb-2">
+                    <button class="btn btn-sm btn-primary me-2 category-btn active" data-category="todos">
+                        <i class="fas fa-th-large me-1"></i>Todos
                     </button>
-                </div>
-                
-                <!-- Categories quick filter for mobile -->
-                <div class="categories-filter d-flex flex-nowrap overflow-auto mb-3 pb-2">
-                    <button class="btn btn-sm btn-primary me-2 category-btn active" data-category="todos">Todos</button>
                     <?php
                     // Get unique categories
-                    $sql_categorias = "SELECT DISTINCT categoria FROM produtos WHERE quantidade_estoque > 0 AND categoria != '' ORDER BY categoria";
+                    $sql_categorias = "SELECT DISTINCT c.nome as categoria 
+                                     FROM produtos p 
+                                     INNER JOIN categorias c ON p.categoria_id = c.id 
+                                     WHERE p.quantidade_estoque > 0 
+                                     ORDER BY c.nome";
                     $result_categorias = mysqli_query($conn, $sql_categorias);
                     while($cat = mysqli_fetch_assoc($result_categorias)) {
                         echo '<button class="btn btn-sm btn-outline-primary me-2 category-btn" 
@@ -71,54 +157,45 @@ if (isset($_SESSION['message']) && isset($_SESSION['message_type'])) {
                     ?>
                 </div>
                 
-                <div class="row g-2" id="products-container">
+                <div class="row g-3" id="products-container">
                     <?php if (mysqli_num_rows($result) > 0): ?>
                         <?php while($row = mysqli_fetch_assoc($result)): ?>
-                            <div class="col-6 col-md-4 col-xl-3 mb-3 product-item" 
+                            <div class="col-12 col-md-4 col-xl-3 product-item" 
                                  data-name="<?php echo strtolower($row['nome']); ?>"
-                                 data-category="<?php echo strtolower($row['categoria']); ?>">
-                                <div class="card h-100 product-card <?php echo ($row['quantidade_estoque'] <= 0) ? 'out-of-stock' : ''; ?>">
-                                    <div class="card-body text-center p-2 p-md-3">
-                                        <div class="product-header mb-2">
-                                            <h6 class="card-title text-truncate mb-0"><?php echo $row['nome']; ?></h6>
-                                        </div>
-                                        <p class="card-text mb-2">
-                                            <span class="badge bg-primary rounded-pill fs-6 price-badge">
-                                                R$ <?php echo number_format($row['preco'], 2, ',', '.'); ?>
-                                            </span>
-                                        </p>
-                                        <div class="d-flex justify-content-between align-items-center mt-auto product-footer">
-                                            <div class="text-muted">
-                                                <?php if ($row['quantidade_estoque'] <= 0): ?>
-                                                    <span class="badge bg-danger stock-badge">
-                                                        <i class="fas fa-ban me-1"></i> Sem estoque
-                                                    </span>
-                                                <?php elseif ($row['quantidade_estoque'] <= 5): ?>
-                                                    <span class="badge bg-danger stock-badge">
-                                                        <i class="fas fa-box me-1"></i> <?php echo $row['quantidade_estoque']; ?>
-                                                    </span>
-                                                <?php elseif ($row['quantidade_estoque'] <= 10): ?>
-                                                    <span class="badge bg-warning text-dark stock-badge">
-                                                        <i class="fas fa-box me-1"></i> <?php echo $row['quantidade_estoque']; ?>
-                                                    </span>
-                                                <?php else: ?>
-                                                    <span class="badge bg-success stock-badge">
-                                                        <i class="fas fa-box me-1"></i> <?php echo $row['quantidade_estoque']; ?>
-                                                    </span>
+                                 data-category="<?php echo strtolower($row['categoria_nome'] ?? ''); ?>">
+                                <div class="card h-100 product-card shadow-sm <?php echo ($row['quantidade_estoque'] <= 0) ? 'out-of-stock' : ''; ?>">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="product-info flex-grow-1 me-3">
+                                                <h6 class="product-name mb-1"><?php echo $row['nome']; ?></h6>
+                                                <div class="price-tag fw-bold text-primary">R$ <?php echo number_format($row['preco'], 2, ',', '.'); ?></div>
+                                                <?php if ($row['quantidade_estoque'] > 0): ?>
+                                                    <div class="stock-info mt-1">
+                                                        <small class="<?php echo $row['quantidade_estoque'] <= 5 ? 'text-danger' : 
+                                                            ($row['quantidade_estoque'] <= 10 ? 'text-warning' : 'text-success'); ?>">
+                                                            <i class="fas fa-box"></i> <?php echo $row['quantidade_estoque']; ?> em estoque
+                                                        </small>
+                                                    </div>
                                                 <?php endif; ?>
                                             </div>
-                                            <button type="button" 
-                                                class="btn btn-primary add-product-btn <?php echo ($row['quantidade_estoque'] <= 0) ? 'disabled' : 'add-product'; ?>"
-                                                <?php if ($row['quantidade_estoque'] <= 0): ?>
-                                                disabled title="Produto sem estoque"
-                                                <?php else: ?>
-                                                data-id="<?php echo $row['id']; ?>"
-                                                data-nome="<?php echo htmlspecialchars($row['nome']); ?>"
-                                                data-preco="<?php echo $row['preco']; ?>"
-                                                data-estoque="<?php echo $row['quantidade_estoque']; ?>"
-                                                <?php endif; ?>>
-                                                <i class="<?php echo ($row['quantidade_estoque'] <= 0) ? 'fas fa-ban' : 'fas fa-plus'; ?>"></i>
-                                            </button>
+                                            <?php if ($row['quantidade_estoque'] <= 0): ?>
+                                                <span class="stock-badge bg-danger">
+                                                    <i class="fas fa-ban"></i>
+                                                </span>
+                                            <?php else: ?>
+                                                <button type="button" 
+                                                    class="btn add-product-btn mobile-square-btn <?php echo ($row['quantidade_estoque'] <= 0) ? 'disabled' : 'add-product'; ?>"
+                                                    <?php if ($row['quantidade_estoque'] <= 0): ?>
+                                                    disabled title="Produto sem estoque"
+                                                    <?php else: ?>
+                                                    data-id="<?php echo $row['id']; ?>"
+                                                    data-nome="<?php echo htmlspecialchars($row['nome']); ?>"
+                                                    data-preco="<?php echo $row['preco']; ?>"
+                                                    data-estoque="<?php echo $row['quantidade_estoque']; ?>"
+                                                    <?php endif; ?>>
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
@@ -126,7 +203,10 @@ if (isset($_SESSION['message']) && isset($_SESSION['message_type'])) {
                         <?php endwhile; ?>
                     <?php else: ?>
                         <div class="col-12 text-center">
-                            <p>Nenhum produto em estoque</p>
+                            <div class="empty-state">
+                                <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">Nenhum produto em estoque</p>
+                            </div>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -157,11 +237,18 @@ if (isset($_SESSION['message']) && isset($_SESSION['message_type'])) {
                         <p id="empty-cart" class="text-center">O carrinho está vazio</p>
                     </div>
                     
-                    <div class="mb-3 mt-4">
-                        <h5>Resumo</h5>
-                        <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded">
-                            <strong>Total:</strong>
-                            <span id="cart-total" class="fs-5 fw-bold">R$ 0,00</span>
+                    <!-- Toggle button for cart items -->
+                    <div id="cart-toggle" class="text-center mb-3" style="display: none;">
+                        <button type="button" class="btn btn-sm btn-outline-primary toggle-cart-items">
+                            <span class="toggle-text">Ver todos</span>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="total-section">
+                        <div class="d-flex justify-content-between align-items-center bg-dark text-white p-2 rounded-pill">
+                            <span class="ms-3">Total:</span>
+                            <span id="cart-total" class="fs-5 fw-bold me-3">R$ 0,00</span>
                             <input type="hidden" name="valor_total" id="valor_total_input" value="0">
                         </div>
                     </div>
@@ -252,6 +339,25 @@ if (isset($_SESSION['message']) && isset($_SESSION['message_type'])) {
 </div>
 
 <script>
+// Atualizar data e hora em tempo real
+function updateDateTime() {
+    const now = new Date();
+    const timeElement = document.getElementById('current-time');
+    const dateElement = document.getElementById('current-date');
+    
+    // Formatar hora
+    const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+    timeElement.textContent = now.toLocaleTimeString('pt-BR', timeOptions);
+    
+    // Formatar data
+    const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    dateElement.textContent = now.toLocaleDateString('pt-BR', dateOptions);
+}
+
+// Atualizar a cada segundo
+updateDateTime();
+setInterval(updateDateTime, 1000);
+
 document.addEventListener('DOMContentLoaded', function() {
     const cartItems = {};
     const cartTotal = document.getElementById('cart-total');
@@ -264,6 +370,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const toggleCartBtn = document.getElementById('toggle-cart-btn');
     const paymentRequired = document.querySelector('.payment-required');
     const cartCounter = document.querySelector('.cart-counter');
+    const cartToggle = document.getElementById('cart-toggle');
+    let isCartExpanded = false;
     
     // Inicializar o Toast de erro
     const errorToastEl = document.getElementById('errorToast');
@@ -523,6 +631,28 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    // Add toggle functionality
+    if (cartToggle) {
+        cartToggle.querySelector('.toggle-cart-items').addEventListener('click', function() {
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartItemElements = cartItemsContainer.querySelectorAll('.cart-item');
+            const toggleText = this.querySelector('.toggle-text');
+            const toggleIcon = this.querySelector('.toggle-icon');
+            
+            isCartExpanded = !isCartExpanded;
+            
+            cartItemElements.forEach((item, index) => {
+                if (index >= 2) {
+                    item.style.display = isCartExpanded ? 'block' : 'none';
+                }
+            });
+            
+            toggleText.textContent = isCartExpanded ? 'Ver menos' : 'Ver todos';
+            toggleIcon.classList.toggle('fa-chevron-up');
+            toggleIcon.classList.toggle('fa-chevron-down');
+        });
+    }
+    
     // Create cart item HTML element
     function createCartItemElement(id) {
         const item = cartItems[id];
@@ -535,26 +665,32 @@ document.addEventListener('DOMContentLoaded', function() {
         cartItemEl.className = 'cart-item mb-2 border-bottom pb-2';
         cartItemEl.dataset.id = id;
         
+        // Check if this is the third or later item
+        const existingItems = document.querySelectorAll('.cart-item').length;
+        if (existingItems >= 2) {
+            cartItemEl.style.display = isCartExpanded ? 'block' : 'none';
+        }
+        
         cartItemEl.innerHTML = `
-            <div class="d-flex justify-content-between align-items-start">
-                <div class="flex-grow-1 me-2">
-                    <div class="d-flex justify-content-between">
-                        <h6 class="mb-0 text-truncate" style="max-width: 150px;">${item.nome}</h6>
-                        <button type="button" class="btn btn-sm btn-link text-danger p-0 remove-item">
-                            <i class="fas fa-times"></i>
-                        </button>
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center flex-grow-1">
+                    <div class="input-group input-group-sm me-2" style="width: 80px;">
+                        <button type="button" class="btn btn-outline-secondary decrease-quantity px-1">-</button>
+                        <input type="number" class="form-control text-center item-quantity p-0" 
+                               value="${item.quantidade}" min="1" name="quantidade[${id}]">
+                        <button type="button" class="btn btn-outline-secondary increase-quantity px-1">+</button>
                     </div>
-                    <div class="d-flex align-items-center mt-2">
-                        <div class="input-group input-group-sm" style="width: 100px;">
-                            <button type="button" class="btn btn-outline-secondary decrease-quantity">-</button>
-                            <input type="number" class="form-control text-center item-quantity p-0" 
-                                   value="${item.quantidade}" min="1" name="quantidade[${id}]">
-                            <button type="button" class="btn btn-outline-secondary increase-quantity">+</button>
-                        </div>
-                        <div class="item-price ms-2">
-                            R$ ${formatPrice(item.preco * item.quantidade)}
-                        </div>
+                    <div class="text-truncate" style="max-width: 130px;">
+                        <small class="fw-medium">${item.nome}</small>
                     </div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="item-price me-2">
+                        <small class="fw-bold">R$ ${formatPrice(item.preco * item.quantidade)}</small>
+                    </div>
+                    <button type="button" class="btn btn-sm text-danger remove-item p-0" style="font-size: 16px;">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             </div>
             <input type="hidden" name="produto_id[]" value="${id}">
@@ -564,6 +700,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('cart-items').appendChild(cartItemEl);
         updateCartCounter();
         
+        // Show/hide toggle button based on number of items
+        const totalItems = document.querySelectorAll('.cart-item').length;
+        cartToggle.style.display = totalItems > 2 ? 'block' : 'none';
+
         // Add event listeners for the new item
         const newItem = document.querySelector(`.cart-item[data-id="${id}"]`);
         
@@ -646,7 +786,7 @@ document.addEventListener('DOMContentLoaded', function() {
         cartItemEl.querySelector('.item-price').textContent = `R$ ${formatPrice(item.preco * item.quantidade)}`;
     }
     
-    // Update cart total
+    // Update cart total and toggle visibility
     function updateCartTotal() {
         let total = 0;
         
@@ -662,7 +802,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (Object.keys(cartItems).length === 0) {
             emptyCartMessage.style.display = 'block';
             valorTotalInput.value = '0';
+            cartToggle.style.display = 'none';
         }
+        
+        // Show/hide toggle button based on number of items
+        const totalItems = Object.keys(cartItems).length;
+        cartToggle.style.display = totalItems > 2 ? 'block' : 'none';
     }
     
     // Format price
@@ -783,50 +928,96 @@ document.addEventListener('DOMContentLoaded', function() {
 <style>
 /* Estilos gerais de produto */
 .product-card {
-    transition: all 0.2s;
     border: 1px solid #dee2e6;
-    height: 100%;
+    transition: all 0.2s;
+    background-color: #fff;
 }
 
 .product-card:hover {
-    border-color: var(--primary-color);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
 }
 
-.product-footer {
-    margin-top: 12px;
-    padding-top: 8px;
-    border-top: 1px dashed #eee;
+.product-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #212529;
+    display: block;
+    line-height: 1.2;
 }
 
-.price-badge {
-    font-size: 1rem;
-    padding: 0.25rem 0.6rem;
+.price-tag {
+    font-size: 0.95rem;
     font-weight: 600;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: #0d6efd;
+    line-height: 1;
 }
 
-.add-product-btn {
+.btn-circle {
+    width: 32px;
+    height: 32px;
+    padding: 0;
     border-radius: 50%;
-    width: 36px;
-    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
+    background-color: #0d6efd;
+    color: white;
+    border: none;
     transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.add-product-btn:hover {
+.btn-circle:hover {
+    background-color: #0b5ed7;
     transform: scale(1.1);
 }
 
+.stock-info {
+    position: absolute;
+    bottom: 4px;
+    right: 8px;
+    font-size: 0.75rem;
+}
+
+.stock-info i {
+    font-size: 0.7rem;
+}
+
 .stock-badge {
-    font-size: 0.85rem;
-    padding: 0.2rem 0.5rem;
-    border-radius: 20px;
-    font-weight: 500;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.out-of-stock {
+    opacity: 0.7;
+}
+
+.out-of-stock::before {
+    content: none;
+}
+
+@media (max-width: 576px) {
+    .product-name {
+        font-size: 0.85rem;
+    }
+    
+    .price-tag {
+        font-size: 0.9rem;
+    }
+    
+    .btn-circle {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .stock-info {
+        font-size: 0.7rem;
+    }
 }
 
 /* Mobile optimizations */
@@ -1236,6 +1427,253 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .out-of-stock .card-body {
     opacity: 0.85;
+}
+
+/* Estilos para o toggle do carrinho */
+.toggle-cart-items {
+    width: 100%;
+    padding: 5px;
+    margin-top: -10px;
+    border: 1px dashed #dee2e6;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+.toggle-cart-items:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.toggle-cart-items .toggle-icon {
+    margin-left: 5px;
+    transition: transform 0.2s ease;
+}
+
+.toggle-cart-items .toggle-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+/* Animação para os itens do carrinho */
+.cart-item {
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 991px) {
+    .cart-items-container {
+        max-height: none;
+        overflow-y: visible;
+    }
+    
+    #cart-toggle {
+        position: sticky;
+        bottom: 0;
+        background-color: white;
+        padding: 5px 0;
+        border-top: 1px solid #dee2e6;
+        z-index: 1;
+    }
+    
+    .toggle-cart-items {
+        margin-top: 0;
+        border-radius: 20px;
+        padding: 8px 15px;
+    }
+}
+
+/* Estilos para itens do carrinho mais compactos */
+.cart-item {
+    padding: 4px 0;
+    margin-bottom: 4px !important;
+}
+
+.cart-item .input-group-sm > .form-control,
+.cart-item .input-group-sm > .btn {
+    padding: 2px;
+    font-size: 0.8rem;
+    line-height: 1.2;
+    min-height: 24px;
+}
+
+.cart-item .input-group {
+    min-width: 80px;
+}
+
+.cart-item .form-control {
+    height: 24px;
+    padding: 0 2px !important;
+}
+
+.cart-item small {
+    font-size: 0.85rem;
+    line-height: 1.2;
+}
+
+.cart-item .remove-item {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.cart-item .remove-item:hover {
+    opacity: 1;
+}
+
+.cart-card .bg-dark {
+    background-color: #212529 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.cart-card #cart-total {
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+@media (max-width: 991px) {
+    .cart-card .bg-dark {
+        border-radius: 8px;
+        margin: 0 2px;
+    }
+}
+
+.total-section {
+    margin: 8px 0;
+    position: relative;
+}
+
+.total-section .bg-dark {
+    background-color: #212529 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.total-section #cart-total {
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    font-size: 1.1rem !important;
+}
+
+@media (max-width: 991px) {
+    .total-section {
+        margin: 8px 2px;
+    }
+    
+    .total-section .rounded-pill {
+        border-radius: 20px !important;
+    }
+}
+
+/* Atualize os estilos do carrinho */
+.cart-card {
+    background-color: #212529;
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.cart-card .card-header {
+    background-color: #2c3136;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
+}
+
+.cart-card .text-muted {
+    color: #adb5bd !important;
+}
+
+/* Estilo para o carrinho vazio */
+#empty-cart {
+    color: #adb5bd;
+}
+
+/* Estilos para itens do carrinho */
+.cart-item {
+    padding: 4px 0;
+    margin-bottom: 4px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+.cart-item small {
+    color: #e9ecef;
+}
+
+.cart-item .input-group-sm > .form-control,
+.cart-item .input-group-sm > .btn {
+    background-color: #2c3136;
+    border-color: #495057;
+    color: #fff;
+}
+
+.cart-item .input-group-sm > .form-control:focus {
+    background-color: #343a40;
+    color: #fff;
+    border-color: #6c757d;
+}
+
+.cart-item .input-group-sm > .btn:hover {
+    background-color: #343a40;
+    border-color: #6c757d;
+    color: #fff;
+}
+
+.cart-item .remove-item {
+    color: #dc3545 !important;
+    opacity: 0.8;
+}
+
+.cart-item .remove-item:hover {
+    opacity: 1;
+}
+
+/* Estilo para o botão de toggle do carrinho */
+.toggle-cart-items {
+    background-color: #2c3136;
+    border-color: #495057;
+    color: #adb5bd;
+}
+
+.toggle-cart-items:hover {
+    background-color: #343a40;
+    border-color: #6c757d;
+    color: #fff;
+}
+
+/* Ajustes para o total e botões de pagamento */
+.total-section .bg-dark {
+    background-color: #2c3136 !important;
+}
+
+.payment-buttons .btn {
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Mobile adjustments */
+@media (max-width: 991px) {
+    #cart-container {
+        background-color: #212529;
+    }
+    
+    .cart-card {
+        background-color: #212529;
+    }
+    
+    #cart-toggle {
+        background-color: #212529;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+}
+
+/* Ajuste para o backdrop do carrinho mobile */
+.cart-backdrop {
+    background-color: rgba(0,0,0,0.5);
+}
+
+/* Estilo para o handle do carrinho mobile */
+.mobile-cart-handle {
+    background-color: rgba(255,255,255,0.2);
 }
 </style>
 

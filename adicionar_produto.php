@@ -5,11 +5,15 @@ require_once 'check_admin.php';
 $message = '';
 $messageType = '';
 
+// Buscar todas as categorias
+$sql_categorias = "SELECT * FROM categorias ORDER BY nome";
+$result_categorias = mysqli_query($conn, $sql_categorias);
+
 // Process form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nome = mysqli_real_escape_string($conn, $_POST['nome']);
     $preco = mysqli_real_escape_string($conn, $_POST['preco']);
-    $categoria = mysqli_real_escape_string($conn, $_POST['categoria']);
+    $categoria_id = mysqli_real_escape_string($conn, $_POST['categoria_id']);
     $quantidade = mysqli_real_escape_string($conn, $_POST['quantidade_estoque']);
     
     // Replace comma with dot for decimal
@@ -20,16 +24,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = 'Por favor, preencha todos os campos obrigatórios.';
         $messageType = 'danger';
     } else {
-        $sql = "INSERT INTO produtos (nome, preco, categoria, quantidade_estoque) 
-                VALUES ('$nome', $preco, '$categoria', $quantidade)";
+        $sql = "INSERT INTO produtos (nome, preco, categoria_id, quantidade_estoque) 
+                VALUES ('$nome', $preco, '$categoria_id', $quantidade)";
                 
         if (mysqli_query($conn, $sql)) {
+            // Get category name for the message
+            $sql_cat = "SELECT nome FROM categorias WHERE id = '$categoria_id'";
+            $result_cat = mysqli_query($conn, $sql_cat);
+            $categoria_nome = '';
+            if ($row_cat = mysqli_fetch_assoc($result_cat)) {
+                $categoria_nome = $row_cat['nome'];
+            }
+            
             // Armazena informações do produto para uso na modal
             $_SESSION['message'] = 'Produto adicionado com sucesso!';
             $_SESSION['message_type'] = 'success';
             $_SESSION['produto_nome'] = $nome;
             $_SESSION['produto_preco'] = number_format((float)$preco, 2, ',', '.');
-            $_SESSION['produto_categoria'] = $categoria;
+            $_SESSION['produto_categoria'] = $categoria_nome;
             $_SESSION['produto_quantidade'] = $quantidade;
             $_SESSION['show_modal'] = true;
             
@@ -71,8 +83,20 @@ include 'header.php';
             </div>
             
             <div class="mb-3">
-                <label for="categoria" class="form-label">Categoria</label>
-                <input type="text" class="form-control" id="categoria" name="categoria">
+                <label for="categoria_id" class="form-label">Categoria *</label>
+                <div class="input-group">
+                    <select class="form-select" id="categoria_id" name="categoria_id" required>
+                        <option value="">Selecione uma categoria</option>
+                        <?php while ($categoria = mysqli_fetch_assoc($result_categorias)): ?>
+                            <option value="<?php echo $categoria['id']; ?>">
+                                <?php echo htmlspecialchars($categoria['nome']); ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+                    <a href="produtos/categorias.php" class="btn btn-outline-secondary" target="_blank">
+                        Gerenciar Categorias
+                    </a>
+                </div>
             </div>
             
             <div class="mb-3">

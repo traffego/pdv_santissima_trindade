@@ -67,7 +67,10 @@ while ($row = mysqli_fetch_assoc($result)) {
 // Obter lista de caixas disponíveis para filtro (apenas para administradores)
 $caixas = [];
 if ($_SESSION['nivel'] === 'administrador') {
-    $sql_caixas = "SELECT DISTINCT caixa FROM vendas ORDER BY caixa";
+    $sql_caixas = "SELECT DISTINCT caixa_numero as caixa FROM usuarios WHERE nivel = 'operador' AND ativo = 1 
+                   UNION 
+                   SELECT DISTINCT caixa FROM vendas 
+                   ORDER BY caixa";
     $result_caixas = mysqli_query($conn, $sql_caixas);
     while ($row = mysqli_fetch_assoc($result_caixas)) {
         $caixas[] = $row['caixa'];

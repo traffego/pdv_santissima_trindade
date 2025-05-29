@@ -1,5 +1,11 @@
 <?php
 // Database configuration
+// $host = 'localhost';
+// $user = 'platafo5_pdv';
+// $password = 'kqtnJ9laxto.';
+// $database = 'platafo5_pdv';
+
+// Database configuration
 $host = 'localhost';
 $user = 'root';
 $password = '';

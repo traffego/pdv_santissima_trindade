@@ -93,99 +93,151 @@ $data['potencial'] = $row_potential['potential'] ?? 0;
 include 'header.php';
 ?>
 
-<div class="row mb-4">
+<div class="row g-4">
     <div class="col-md-4">
-        <div class="card">
-            <div class="card-body text-center">
-                <h5 class="card-title">Total de Vendas Hoje</h5>
-                <h2 class="text-primary">R$ <?php echo number_format($data['vendas_hoje'], 2, ',', '.'); ?></h2>
-                <p class="text-muted"><?php echo date('d/m/Y'); ?></p>
+        <div class="card h-100">
+            <div class="card-header py-3">
+                <h5 class="m-0">Total de Vendas Hoje</h5>
+            </div>
+            <div class="card-body d-flex flex-column justify-content-center text-center">
+                <h2 class="text-primary mb-2">R$ <?php echo number_format($data['vendas_hoje'], 2, ',', '.'); ?></h2>
+                <p class="text-muted mb-0"><?php echo date('d/m/Y'); ?></p>
             </div>
         </div>
     </div>
     
     <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Vendas por Pagamento</h5>
-                <canvas id="payment-chart"></canvas>
+        <div class="card h-100">
+            <div class="card-header py-3">
+                <h5 class="m-0">Vendas por Pagamento</h5>
             </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header bg-light">
-                <div class="text-center">
-                    <img src="logo.jpeg" alt="Logo" class="img-fluid" style="max-height: 60px;">
+            <div class="card-body d-flex flex-column">
+                <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+                    <canvas id="payment-chart"></canvas>
                 </div>
             </div>
-            <div class="card-body text-center">
-                <h5 class="card-title">Faturamento Potencial</h5>
-                <div class="gauge-container">
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header py-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="m-0">Faturamento Potencial</h5>
+                    <img src="logo.jpeg" alt="Logo" class="img-fluid" style="max-height: 30px;">
+                </div>
+            </div>
+            <div class="card-body d-flex flex-column justify-content-center text-center">
+                <div class="gauge-container flex-grow-1 d-flex align-items-center justify-content-center">
                     <canvas id="gauge-chart"></canvas>
                 </div>
-                <p class="mt-2">R$ <?php echo number_format($data['potencial'], 2, ',', '.'); ?></p>
+                <p class="mt-2 mb-0">R$ <?php echo number_format($data['potencial'], 2, ',', '.'); ?></p>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row mb-4">
+<div class="row g-4 mt-2">
     <div class="col-md-6">
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card h-100">
+            <div class="card-header py-3">
                 <h5 class="m-0">Produtos Mais Vendidos</h5>
             </div>
             <div class="card-body">
-                <canvas id="products-chart" height="250"></canvas>
+                <canvas id="products-chart"></canvas>
             </div>
         </div>
     </div>
     
     <div class="col-md-6">
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card h-100">
+            <div class="card-header py-3">
                 <h5 class="m-0">Níveis de Estoque</h5>
             </div>
             <div class="card-body">
-                <canvas id="stock-chart" height="250"></canvas>
+                <canvas id="stock-chart"></canvas>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row">
+<div class="row g-4 mt-2">
     <div class="col-md-6">
-        <div class="card mb-4">
-            <div class="card-header">
+        <div class="card h-100">
+            <div class="card-header py-3">
                 <h5 class="m-0">Vendas por Caixa</h5>
             </div>
             <div class="card-body">
-                <canvas id="register-chart" height="250"></canvas>
+                <canvas id="register-chart"></canvas>
             </div>
         </div>
     </div>
     
     <div class="col-md-6">
-        <div class="card mb-4">
-            <div class="card-header">
+        <div class="card h-100">
+            <div class="card-header py-3">
                 <h5 class="m-0">Vendas por Operador</h5>
             </div>
             <div class="card-body">
-                <canvas id="users-chart" height="250"></canvas>
+                <canvas id="users-chart"></canvas>
             </div>
         </div>
     </div>
 </div>
 
+<style>
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 0;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.card-header h5 {
+    color: #495057;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.card-body {
+    min-height: 250px;
+    padding: 1.25rem;
+}
+
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.gauge-container canvas {
+    max-height: 150px;
+}
+</style>
+
 <script>
-// Helper function to create charts
-function createChart(id, type, data, options) {
+// Helper function to create charts with consistent options
+function createChart(id, type, data, options = {}) {
+    const defaultOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: { 
+                    boxWidth: 12,
+                    padding: 15
+                }
+            }
+        }
+    };
+
     return new Chart(document.getElementById(id), {
         type: type,
         data: data,
-        options: options
+        options: { ...defaultOptions, ...options }
     });
 }
 
@@ -200,14 +252,6 @@ createChart('payment-chart', 'pie', {
         ],
         backgroundColor: ['#28a745', '#17a2b8', '#ffc107']
     }]
-}, {
-    responsive: true,
-    plugins: {
-        legend: {
-            position: 'bottom',
-            labels: { boxWidth: 12 }
-        }
-    }
 });
 
 // Products chart
@@ -218,11 +262,9 @@ createChart('products-chart', 'pie', {
         backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
     }]
 }, {
-    responsive: true,
     plugins: {
         legend: {
-            position: 'right',
-            labels: { boxWidth: 12 }
+            position: 'right'
         }
     }
 });
@@ -237,7 +279,6 @@ createChart('stock-chart', 'bar', {
     }]
 }, {
     indexAxis: 'y',
-    responsive: true,
     plugins: {
         legend: { display: false }
     }
@@ -250,54 +291,19 @@ const registerLabels = [<?php
     }, array_keys($data['caixas']))); 
 ?>];
 
-const registerSales = [<?php 
-    echo implode(',', array_map(function($item) { 
-        return $item['vendas']; 
-    }, array_values($data['caixas']))); 
-?>];
-
-const registerValues = [<?php 
-    echo implode(',', array_map(function($item) { 
-        return $item['total']; 
-    }, array_values($data['caixas']))); 
+const registerData = [<?php 
+    echo implode(',', array_map(function($data) { 
+        return $data['total']; 
+    }, $data['caixas'])); 
 ?>];
 
 createChart('register-chart', 'bar', {
     labels: registerLabels,
-    datasets: [
-        {
-            label: 'Número de Vendas',
-            data: registerSales,
-            backgroundColor: '#6c757d',
-            borderWidth: 1,
-            yAxisID: 'y'
-        },
-        {
-            label: 'Valor Total (R$)',
-            data: registerValues,
-            backgroundColor: '#007bff',
-            borderWidth: 1,
-            yAxisID: 'y1'
-        }
-    ]
-}, {
-    responsive: true,
-    plugins: { legend: { position: 'top' } },
-    scales: {
-        y: {
-            type: 'linear',
-            display: true,
-            position: 'left',
-            title: { display: true, text: 'Número de Vendas' }
-        },
-        y1: {
-            type: 'linear',
-            display: true,
-            position: 'right',
-            title: { display: true, text: 'Valor Total (R$)' },
-            grid: { drawOnChartArea: false }
-        }
-    }
+    datasets: [{
+        label: 'Total de Vendas (R$)',
+        data: registerData,
+        backgroundColor: '#20c997'
+    }]
 });
 
 // Users chart
@@ -307,38 +313,19 @@ const userLabels = [<?php
     }, array_keys($data['usuarios']))); 
 ?>];
 
-const userSales = [<?php 
-    echo implode(',', array_map(function($item) { 
-        return $item['vendas']; 
-    }, array_values($data['usuarios']))); 
-?>];
-
-const userValues = [<?php 
-    echo implode(',', array_map(function($item) { 
-        return $item['total']; 
-    }, array_values($data['usuarios']))); 
+const userData = [<?php 
+    echo implode(',', array_map(function($data) { 
+        return $data['total']; 
+    }, $data['usuarios'])); 
 ?>];
 
 createChart('users-chart', 'bar', {
     labels: userLabels,
-    datasets: [
-        {
-            label: 'Vendas',
-            data: userSales,
-            backgroundColor: '#fd7e14',
-            borderWidth: 1,
-        },
-        {
-            label: 'Valor (R$)',
-            data: userValues,
-            backgroundColor: '#20c997',
-            borderWidth: 1,
-        }
-    ]
-}, {
-    responsive: true,
-    plugins: { legend: { position: 'top' } },
-    indexAxis: 'y',
+    datasets: [{
+        label: 'Total de Vendas (R$)',
+        data: userData,
+        backgroundColor: '#6f42c1'
+    }]
 });
 
 // Gauge chart

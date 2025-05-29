@@ -49,6 +49,30 @@
             transition: all 0.2s;
         }
         
+        /* Submenu styles */
+        .submenu {
+            margin-left: 10px;
+            border-left: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .submenu a {
+            font-size: 0.9em;
+            padding: 8px 15px;
+            opacity: 0.9;
+        }
+        
+        .submenu a:hover {
+            opacity: 1;
+        }
+        
+        .menu-group {
+            margin-bottom: 10px;
+        }
+        
+        .menu-group > a.active + .submenu {
+            border-left-color: var(--primary-color);
+        }
+        
         .sidebar a:hover {
             background-color: #495057;
             transform: translateX(3px);
@@ -186,6 +210,232 @@
             background-color: rgba(0,0,0,0.5);
             z-index: 1025;
         }
+
+        /* Venda page styles */
+        .header-section {
+            margin: -1.5rem -1.5rem 2rem -1.5rem;
+        }
+
+        .main-header {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h100v100H0z" fill="none"/><path d="M100 0H0v100h100V0zM9.941 50c0 22.124 17.935 40.059 40.059 40.059 22.124 0 40.059-17.935 40.059-40.059 0-22.124-17.935-40.059-40.059-40.059C27.876 9.941 9.941 27.876 9.941 50z" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+            opacity: 0.1;
+        }
+
+        .header-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-icon-sm {
+            width: 35px;
+            height: 35px;
+            background: rgba(13, 110, 253, 0.1);
+            border-radius: 10px;
+        }
+
+        .stats-header {
+            background-size: cover;
+            position: relative;
+        }
+
+        .stats-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: linear-gradient(45deg, rgba(0,0,0,0.1) 0%, rgba(255,255,255,0.1) 100%);
+        }
+
+        .stat-item {
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        /* Produtos section styles */
+        .products-container {
+            border: none;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .card-header {
+            border: none;
+            background: #fff;
+        }
+
+        .search-container .input-group {
+            border: 2px solid #e9ecef;
+            padding: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .search-container .input-group:focus-within {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        .category-btn {
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            padding: 8px 16px;
+        }
+
+        .category-btn.active {
+            transform: scale(1.05);
+        }
+
+        .product-card {
+            border: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .cart-counter {
+            position: relative;
+            top: -8px;
+            right: -8px;
+            font-size: 10px;
+            padding: 3px 6px;
+            border-radius: 10px;
+            background: #dc3545;
+            color: white;
+            border: 2px solid #fff;
+        }
+
+        @media (max-width: 768px) {
+            .header-section {
+                margin: -1rem -1rem 1rem -1rem;
+            }
+
+            .main-header, .stats-header {
+                border-radius: 0 !important;
+            }
+
+            .header-icon {
+                width: 50px;
+                height: 50px;
+            }
+
+            .stat-icon {
+                width: 35px;
+                height: 35px;
+            }
+
+            /* Mobile product styles */
+            .product-card {
+                border-radius: 12px;
+                margin-bottom: 0;
+            }
+
+            .product-card .card-body {
+                padding: 12px 15px;
+            }
+
+            .product-info {
+                min-width: 0; /* Para garantir que o texto quebre corretamente */
+            }
+
+            .product-name {
+                font-size: 1rem;
+                margin-bottom: 4px !important;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .price-tag {
+                font-size: 1.1rem;
+                color: var(--primary-color) !important;
+            }
+
+            .stock-info {
+                font-size: 0.8rem;
+                opacity: 0.8;
+            }
+
+            .mobile-square-btn {
+                width: 42px;
+                height: 42px;
+                border-radius: 10px;
+                background-color: var(--primary-color);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                font-size: 1.2rem;
+                transition: all 0.2s ease;
+                border: none;
+                box-shadow: 0 2px 5px rgba(13, 110, 253, 0.2);
+            }
+
+            .mobile-square-btn:active {
+                transform: scale(0.95);
+                background-color: #0b5ed7;
+            }
+
+            .mobile-square-btn:hover {
+                background-color: #0b5ed7;
+                color: white;
+            }
+
+            .mobile-square-btn:focus {
+                box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+            }
+
+            /* Ajuste do espaçamento entre produtos */
+            .product-item {
+                margin-bottom: 10px;
+            }
+
+            /* Melhorar visualização do estoque */
+            .stock-info {
+                margin-top: 4px !important;
+            }
+
+            .stock-info small {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+
+            .stock-info i {
+                font-size: 0.7rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -200,11 +450,8 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-2 sidebar d-flex flex-column">
-                <div class="text-center mb-3 mt-2">
-                    <img src="logo.jpeg" alt="Logo" class="img-fluid" style="max-width: 80%;">
-                </div>
                 <div class="user-info">
-                    <img src="https://ui-avatars.com/api/?name=<?php echo $_SESSION['usuario_nome']; ?>&background=random" alt="User Avatar">
+                    <img src="logo.jpeg" alt="Logo" class="img-fluid" style="width: 64px; height: 64px; object-fit: cover;">
                     <h5><?php echo $_SESSION['usuario_nome']; ?></h5>
                     <?php if ($_SESSION['nivel'] === 'administrador'): ?>
                         <span class="badge bg-danger">Administrador</span>
@@ -215,23 +462,42 @@
                 
                 <?php if ($_SESSION['nivel'] === 'administrador'): ?>
                     <!-- Menu de Administrador -->
-                    <a href="index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?> menu-item">
+                    <a href="/checkout/index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-tachometer-alt"></i> Dashboard
                     </a>
-                    <a href="produtos.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'produtos.php' ? 'active' : ''; ?> menu-item">
-                        <i class="fas fa-box"></i> Produtos
-                    </a>
-                    <a href="vender.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'vender.php' ? 'active' : ''; ?> menu-item">
+                    
+                    <!-- Menu Produtos com Submenu -->
+                    <div class="menu-group">
+                        <a href="/checkout/produtos.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['produtos.php', 'adicionar_produto.php', 'editar_produto.php', 'categorias.php', 'editar_categoria.php']) ? 'active' : ''; ?> menu-item">
+                            <i class="fas fa-box"></i> Produtos
+                        </a>
+                        <div class="submenu" style="padding-left: 20px;">
+                            <a href="/checkout/produtos/categorias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'categorias.php' ? 'active' : ''; ?> menu-item">
+                                <i class="fas fa-tags"></i> Categorias
+                            </a>
+                            <a href="/checkout/produtos/gerenciar_permissoes.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'gerenciar_permissoes.php' ? 'active' : ''; ?> menu-item">
+                                <i class="fas fa-key"></i> Permissões
+                            </a>
+                        </div>
+                    </div>
+
+                    <a href="/checkout/vender.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'vender.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-shopping-cart"></i> Vender
                     </a>
-                    <a href="lista_vendas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'lista_vendas.php' || basename($_SERVER['PHP_SELF']) == 'detalhes_venda.php' ? 'active' : ''; ?> menu-item">
+                    <a href="/checkout/lista_vendas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'lista_vendas.php' || basename($_SERVER['PHP_SELF']) == 'detalhes_venda.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-receipt"></i> Vendas
                     </a>
-                    <a href="sangrias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sangrias.php' ? 'active' : ''; ?> menu-item">
+                    <a href="/checkout/controle_caixa.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'controle_caixa.php' ? 'active' : ''; ?> menu-item">
+                        <i class="fas fa-cash-register"></i> Controle de Caixa
+                    </a>
+                    <a href="/checkout/sangrias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sangrias.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-money-bill-wave"></i> Sangrias
                     </a>
-                    <a href="usuarios.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'usuarios.php' || basename($_SERVER['PHP_SELF']) == 'adicionar_usuario.php' || basename($_SERVER['PHP_SELF']) == 'editar_usuario.php' ? 'active' : ''; ?> menu-item">
+                    <a href="/checkout/usuarios.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'usuarios.php' || basename($_SERVER['PHP_SELF']) == 'adicionar_usuario.php' || basename($_SERVER['PHP_SELF']) == 'editar_usuario.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-users"></i> Usuários
+                    </a>
+                    <a href="/checkout/limpar_sistema.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'limpar_sistema.php' ? 'active' : ''; ?> menu-item text-danger">
+                        <i class="fas fa-trash-alt"></i> Limpar Sistema
                     </a>
                 <?php else: ?>
                     <!-- Menu de Operador de Caixa -->

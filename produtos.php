@@ -2,8 +2,11 @@
 require_once 'db.php';
 require_once 'check_admin.php';
 
-// Get products from the database
-$sql = "SELECT * FROM produtos ORDER BY nome";
+// Get products from the database with category names
+$sql = "SELECT p.*, c.nome as categoria_nome 
+        FROM produtos p 
+        LEFT JOIN categorias c ON p.categoria_id = c.id 
+        ORDER BY p.nome";
 $result = mysqli_query($conn, $sql);
 
 include 'header.php';
@@ -49,7 +52,7 @@ if (isset($_SESSION['message']) && isset($_SESSION['message_type'])) {
                                 <td><?php echo $row['id']; ?></td>
                                 <td><?php echo $row['nome']; ?></td>
                                 <td>R$ <?php echo number_format($row['preco'], 2, ',', '.'); ?></td>
-                                <td><?php echo $row['categoria']; ?></td>
+                                <td><?php echo $row['categoria_nome'] ?? 'Sem categoria'; ?></td>
                                 <td>
                                     <?php if ($row['quantidade_estoque'] <= 5): ?>
                                         <span class="badge bg-danger"><?php echo $row['quantidade_estoque']; ?></span>

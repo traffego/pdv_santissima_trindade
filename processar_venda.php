@@ -13,6 +13,27 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// Verificar se o caixa está aberto
+$sql_check_caixa = "SELECT id FROM controle_caixa 
+                    WHERE usuario_id = ? 
+                    AND caixa_numero = ? 
+                    AND status = 'aberto'";
+
+$stmt = mysqli_prepare($conn, $sql_check_caixa);
+mysqli_stmt_bind_param($stmt, "ii", $_SESSION['usuario_id'], $_SESSION['caixa_numero']);
+mysqli_stmt_execute($stmt);
+$result_caixa = mysqli_stmt_get_result($stmt);
+
+if (mysqli_num_rows($result_caixa) === 0) {
+    $_SESSION['message'] = "Não é possível realizar vendas com o caixa fechado!";
+    $_SESSION['message_type'] = "danger";
+    header("Location: vender.php");
+    exit;
+}
+
+$caixa_atual = mysqli_fetch_assoc($result_caixa);
+$controle_caixa_id = $caixa_atual['id'];
+
 // Get form data
 $valor_total = isset($_POST['valor_total']) ? mysqli_real_escape_string($conn, $_POST['valor_total']) : '';
 $forma_pagamento = isset($_POST['forma_pagamento']) ? mysqli_real_escape_string($conn, $_POST['forma_pagamento']) : '';
@@ -50,9 +71,9 @@ mysqli_begin_transaction($conn);
 
 try {
     // Insert sale
-    $sql = "INSERT INTO vendas (valor_total, forma_pagamento, caixa, usuario_id) VALUES (?, ?, ?, ?)";
+    $sql = "INSERT INTO vendas (data_venda, valor_total, forma_pagamento, caixa, usuario_id, controle_caixa_id) VALUES (NOW(), ?, ?, ?, ?, ?)";
     $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, 'dsii', $valor_total, $forma_pagamento, $caixa, $usuario_id);
+    mysqli_stmt_bind_param($stmt, "dsiii", $valor_total, $forma_pagamento, $caixa, $usuario_id, $controle_caixa_id);
     mysqli_stmt_execute($stmt);
     
     // Get the sale ID
@@ -91,6 +112,20 @@ try {
             mysqli_stmt_close($item_stmt);
             mysqli_stmt_close($update_stmt);
         }
+    }
+    
+    // Update totals in control of cash
+    $valor_total = floatval($valor_total);
+    $sql_update_caixa = "UPDATE controle_caixa SET 
+                        valor_vendas = valor_vendas + ?,
+                        valor_vendas_" . strtolower($forma_pagamento) . " = valor_vendas_" . strtolower($forma_pagamento) . " + ?
+                        WHERE id = ?";
+    
+    $stmt = mysqli_prepare($conn, $sql_update_caixa);
+    mysqli_stmt_bind_param($stmt, "ddi", $valor_total, $valor_total, $controle_caixa_id);
+    
+    if (!mysqli_stmt_execute($stmt)) {
+        throw new Exception("Erro ao atualizar controle de caixa: " . mysqli_error($conn));
     }
     
     // Commit the transaction
