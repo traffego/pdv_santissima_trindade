@@ -1,6 +1,21 @@
 <?php require_once 'check_login.php'; ?>
 
 <?php date_default_timezone_set('America/Sao_Paulo'); ?>
+
+<!-- Função para obter a URL base do sistema -->
+function getBaseUrl() {
+    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
+    $host = $_SERVER['HTTP_HOST'];
+    $script_name = dirname($_SERVER['SCRIPT_NAME']);
+    // Remove 'produtos' do caminho se estiver nesse diretório
+    $base_path = str_replace('/produtos', '', $script_name);
+    // Remove barras duplicadas e trailing slash
+    $base_path = rtrim(preg_replace('#/+#', '/', $base_path), '/');
+    return $protocol . $host . $base_path;
+}
+
+$base_url = getBaseUrl();
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -8,7 +23,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema PDV</title>
     <!-- Favicon -->
-    <link rel="icon" href="logo.jpeg" type="image/jpeg">
+    <link rel="icon" href="<?php echo $base_url; ?>/logo.jpeg" type="image/jpeg">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -451,7 +466,7 @@
         <div class="row">
             <div class="col-md-2 sidebar d-flex flex-column">
                 <div class="user-info">
-                    <img src="logo.jpeg" alt="Logo" class="img-fluid" style="width: 64px; height: 64px; object-fit: cover;">
+                    <img src="<?php echo $base_url; ?>/logo.jpeg" alt="Logo" class="img-fluid" style="width: 64px; height: 64px; object-fit: cover;">
                     <h5><?php echo $_SESSION['usuario_nome']; ?></h5>
                     <?php if ($_SESSION['nivel'] === 'administrador'): ?>
                         <span class="badge bg-danger">Administrador</span>
@@ -462,57 +477,57 @@
                 
                 <?php if ($_SESSION['nivel'] === 'administrador'): ?>
                     <!-- Menu de Administrador -->
-                    <a href="/checkout/index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?> menu-item">
+                    <a href="<?php echo $base_url; ?>/index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-tachometer-alt"></i> Dashboard
                     </a>
                     
                     <!-- Menu Produtos com Submenu -->
                     <div class="menu-group">
-                        <a href="/checkout/produtos.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['produtos.php', 'adicionar_produto.php', 'editar_produto.php', 'categorias.php', 'editar_categoria.php']) ? 'active' : ''; ?> menu-item">
+                        <a href="<?php echo $base_url; ?>/produtos.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['produtos.php', 'adicionar_produto.php', 'editar_produto.php', 'categorias.php', 'editar_categoria.php']) ? 'active' : ''; ?> menu-item">
                             <i class="fas fa-box"></i> Produtos
                         </a>
                         <div class="submenu" style="padding-left: 20px;">
-                            <a href="/checkout/produtos/categorias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'categorias.php' ? 'active' : ''; ?> menu-item">
+                            <a href="<?php echo $base_url; ?>/produtos/categorias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'categorias.php' ? 'active' : ''; ?> menu-item">
                                 <i class="fas fa-tags"></i> Categorias
                             </a>
-                            <a href="/checkout/produtos/gerenciar_permissoes.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'gerenciar_permissoes.php' ? 'active' : ''; ?> menu-item">
+                            <a href="<?php echo $base_url; ?>/produtos/gerenciar_permissoes.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'gerenciar_permissoes.php' ? 'active' : ''; ?> menu-item">
                                 <i class="fas fa-key"></i> Permissões
                             </a>
                         </div>
                     </div>
 
-                    <a href="/checkout/vender.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'vender.php' ? 'active' : ''; ?> menu-item">
+                    <a href="<?php echo $base_url; ?>/vender.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'vender.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-shopping-cart"></i> Vender
                     </a>
-                    <a href="/checkout/lista_vendas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'lista_vendas.php' || basename($_SERVER['PHP_SELF']) == 'detalhes_venda.php' ? 'active' : ''; ?> menu-item">
+                    <a href="<?php echo $base_url; ?>/lista_vendas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'lista_vendas.php' || basename($_SERVER['PHP_SELF']) == 'detalhes_venda.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-receipt"></i> Vendas
                     </a>
-                    <a href="/checkout/controle_caixa.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'controle_caixa.php' ? 'active' : ''; ?> menu-item">
+                    <a href="<?php echo $base_url; ?>/controle_caixa.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'controle_caixa.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-cash-register"></i> Controle de Caixa
                     </a>
-                    <a href="/checkout/sangrias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sangrias.php' ? 'active' : ''; ?> menu-item">
+                    <a href="<?php echo $base_url; ?>/sangrias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sangrias.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-money-bill-wave"></i> Sangrias
                     </a>
-                    <a href="/checkout/usuarios.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'usuarios.php' || basename($_SERVER['PHP_SELF']) == 'adicionar_usuario.php' || basename($_SERVER['PHP_SELF']) == 'editar_usuario.php' ? 'active' : ''; ?> menu-item">
+                    <a href="<?php echo $base_url; ?>/usuarios.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'usuarios.php' || basename($_SERVER['PHP_SELF']) == 'adicionar_usuario.php' || basename($_SERVER['PHP_SELF']) == 'editar_usuario.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-users"></i> Usuários
                     </a>
-                    <a href="/checkout/limpar_sistema.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'limpar_sistema.php' ? 'active' : ''; ?> menu-item text-danger">
+                    <a href="<?php echo $base_url; ?>/limpar_sistema.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'limpar_sistema.php' ? 'active' : ''; ?> menu-item text-danger">
                         <i class="fas fa-trash-alt"></i> Limpar Sistema
                     </a>
                 <?php else: ?>
                     <!-- Menu de Operador de Caixa -->
-                    <a href="vender.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'vender.php' ? 'active' : ''; ?> menu-item">
+                    <a href="<?php echo $base_url; ?>/vender.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'vender.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-shopping-cart"></i> Vender
                     </a>
-                    <a href="lista_vendas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'lista_vendas.php' || basename($_SERVER['PHP_SELF']) == 'detalhes_venda.php' ? 'active' : ''; ?> menu-item">
+                    <a href="<?php echo $base_url; ?>/lista_vendas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'lista_vendas.php' || basename($_SERVER['PHP_SELF']) == 'detalhes_venda.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-receipt"></i> Minhas Vendas
                     </a>
-                    <a href="sangrias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sangrias.php' ? 'active' : ''; ?> menu-item">
+                    <a href="<?php echo $base_url; ?>/sangrias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sangrias.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-money-bill-wave"></i> Sangrias
                     </a>
                 <?php endif; ?>
                 
-                <a href="logout.php" class="mt-auto logout-btn menu-item">
+                <a href="<?php echo $base_url; ?>/logout.php" class="mt-auto logout-btn menu-item">
                     <i class="fas fa-sign-out-alt"></i> Sair
                 </a>
             </div>
