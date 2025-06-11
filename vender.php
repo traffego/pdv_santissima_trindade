@@ -142,13 +142,30 @@ if (isset($_SESSION['message']) && isset($_SESSION['message_type'])) {
                         <i class="fas fa-th-large me-1"></i>Todos
                     </button>
                     <?php
-                    // Get unique categories
-                    $sql_categorias = "SELECT DISTINCT c.nome as categoria 
-                                     FROM produtos p 
-                                     INNER JOIN categorias c ON p.categoria_id = c.id 
-                                     WHERE p.quantidade_estoque > 0 
-                                     ORDER BY c.nome";
-                    $result_categorias = mysqli_query($conn, $sql_categorias);
+                    // Get unique categories - filtrar por permissões para operadores
+                    if ($_SESSION['nivel'] === 'administrador') {
+                        // Administradores veem todas as categorias
+                        $sql_categorias = "SELECT DISTINCT c.nome as categoria 
+                                         FROM produtos p 
+                                         INNER JOIN categorias c ON p.categoria_id = c.id 
+                                         WHERE p.quantidade_estoque > 0 
+                                         ORDER BY c.nome";
+                        $result_categorias = mysqli_query($conn, $sql_categorias);
+                    } else {
+                        // Operadores veem apenas categorias permitidas
+                        $sql_categorias = "SELECT DISTINCT c.nome as categoria 
+                                         FROM produtos p 
+                                         INNER JOIN categorias c ON p.categoria_id = c.id 
+                                         INNER JOIN permissoes_categorias pc ON c.nome = pc.categoria 
+                                         WHERE p.quantidade_estoque > 0 
+                                         AND pc.usuario_id = ? 
+                                         ORDER BY c.nome";
+                        $stmt_categorias = mysqli_prepare($conn, $sql_categorias);
+                        mysqli_stmt_bind_param($stmt_categorias, "i", $_SESSION['usuario_id']);
+                        mysqli_stmt_execute($stmt_categorias);
+                        $result_categorias = mysqli_stmt_get_result($stmt_categorias);
+                    }
+                    
                     while($cat = mysqli_fetch_assoc($result_categorias)) {
                         echo '<button class="btn btn-sm btn-outline-primary me-2 category-btn" 
                                  data-category="' . strtolower($cat['categoria']) . '">' . 

@@ -468,7 +468,7 @@ date_default_timezone_set('America/Sao_Paulo'); ?>
                 
                 <?php if ($_SESSION['nivel'] === 'administrador'): ?>
                     <!-- Menu de Administrador -->
-                    <a href="/index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?> menu-item">
+                    <a href="index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-tachometer-alt"></i> Dashboard
                     </a>
                     
@@ -493,12 +493,22 @@ date_default_timezone_set('America/Sao_Paulo'); ?>
                     <a href="lista_vendas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'lista_vendas.php' || basename($_SERVER['PHP_SELF']) == 'detalhes_venda.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-receipt"></i> Vendas
                     </a>
-                    <a href="controle_caixa.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'controle_caixa.php' ? 'active' : ''; ?> menu-item">
-                        <i class="fas fa-cash-register"></i> Controle de Caixa
-                    </a>
-                    <a href="sangrias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sangrias.php' ? 'active' : ''; ?> menu-item">
-                        <i class="fas fa-money-bill-wave"></i> Sangrias
-                    </a>
+                    
+                    <!-- Menu de Caixa com Submenu -->
+                    <div class="menu-group">
+                        <a href="controle_caixa.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['controle_caixa.php', 'gestao_caixas.php']) ? 'active' : ''; ?> menu-item">
+                            <i class="fas fa-cash-register"></i> Caixa
+                        </a>
+                        <div class="submenu" style="padding-left: 20px;">
+                            <a href="gestao_caixas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'gestao_caixas.php' ? 'active' : ''; ?> menu-item">
+                                <i class="fas fa-history"></i> Histórico
+                            </a>
+                            <a href="sangrias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sangrias.php' ? 'active' : ''; ?> menu-item">
+                                <i class="fas fa-money-bill-wave"></i> Sangrias
+                            </a>
+                        </div>
+                    </div>
+
                     <a href="usuarios.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'usuarios.php' || basename($_SERVER['PHP_SELF']) == 'adicionar_usuario.php' || basename($_SERVER['PHP_SELF']) == 'editar_usuario.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-users"></i> Usuários
                     </a>
@@ -513,8 +523,27 @@ date_default_timezone_set('America/Sao_Paulo'); ?>
                     <a href="lista_vendas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'lista_vendas.php' || basename($_SERVER['PHP_SELF']) == 'detalhes_venda.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-receipt"></i> Minhas Vendas
                     </a>
-                    <a href="sangrias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sangrias.php' ? 'active' : ''; ?> menu-item">
-                        <i class="fas fa-money-bill-wave"></i> Sangrias
+                    
+                    <!-- Menu de Caixa com Submenu -->
+                    <div class="menu-group">
+                        <a href="controle_caixa.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['controle_caixa.php', 'gestao_caixas.php']) ? 'active' : ''; ?> menu-item">
+                            <i class="fas fa-cash-register"></i> Meu Caixa
+                        </a>
+                        <div class="submenu" style="padding-left: 20px;">
+                            <a href="gestao_caixas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'gestao_caixas.php' ? 'active' : ''; ?> menu-item">
+                                <i class="fas fa-history"></i> Histórico
+                            </a>
+                            <a href="sangrias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sangrias.php' ? 'active' : ''; ?> menu-item">
+                                <i class="fas fa-money-bill-wave"></i> Sangrias
+                            </a>
+                        </div>
+                    </div>
+
+                    <a href="usuarios.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'usuarios.php' || basename($_SERVER['PHP_SELF']) == 'adicionar_usuario.php' || basename($_SERVER['PHP_SELF']) == 'editar_usuario.php' ? 'active' : ''; ?> menu-item">
+                        <i class="fas fa-users"></i> Usuários
+                    </a>
+                    <a href="limpar_sistema.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'limpar_sistema.php' ? 'active' : ''; ?> menu-item text-danger">
+                        <i class="fas fa-trash-alt"></i> Limpar Sistema
                     </a>
                 <?php endif; ?>
                 
