@@ -117,12 +117,11 @@ try {
     // Update totals in control of cash
     $valor_total = floatval($valor_total);
     $sql_update_caixa = "UPDATE controle_caixa SET 
-                        valor_vendas = valor_vendas + ?,
-                        valor_vendas_" . strtolower($forma_pagamento) . " = valor_vendas_" . strtolower($forma_pagamento) . " + ?
+                        valor_vendas = valor_vendas + ?
                         WHERE id = ?";
     
     $stmt = mysqli_prepare($conn, $sql_update_caixa);
-    mysqli_stmt_bind_param($stmt, "ddi", $valor_total, $valor_total, $controle_caixa_id);
+    mysqli_stmt_bind_param($stmt, "di", $valor_total, $controle_caixa_id);
     
     if (!mysqli_stmt_execute($stmt)) {
         throw new Exception("Erro ao atualizar controle de caixa: " . mysqli_error($conn));

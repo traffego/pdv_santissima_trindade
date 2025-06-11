@@ -487,38 +487,38 @@ date_default_timezone_set('America/Sao_Paulo'); ?>
                         </div>
                     </div>
 
-                    <a href="/vender.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'vender.php' ? 'active' : ''; ?> menu-item">
+                    <a href="vender.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'vender.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-shopping-cart"></i> Vender
                     </a>
-                    <a href="/lista_vendas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'lista_vendas.php' || basename($_SERVER['PHP_SELF']) == 'detalhes_venda.php' ? 'active' : ''; ?> menu-item">
+                    <a href="lista_vendas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'lista_vendas.php' || basename($_SERVER['PHP_SELF']) == 'detalhes_venda.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-receipt"></i> Vendas
                     </a>
-                    <a href="/controle_caixa.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'controle_caixa.php' ? 'active' : ''; ?> menu-item">
+                    <a href="controle_caixa.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'controle_caixa.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-cash-register"></i> Controle de Caixa
                     </a>
-                    <a href="/sangrias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sangrias.php' ? 'active' : ''; ?> menu-item">
+                    <a href="sangrias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sangrias.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-money-bill-wave"></i> Sangrias
                     </a>
-                    <a href="/usuarios.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'usuarios.php' || basename($_SERVER['PHP_SELF']) == 'adicionar_usuario.php' || basename($_SERVER['PHP_SELF']) == 'editar_usuario.php' ? 'active' : ''; ?> menu-item">
+                    <a href="usuarios.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'usuarios.php' || basename($_SERVER['PHP_SELF']) == 'adicionar_usuario.php' || basename($_SERVER['PHP_SELF']) == 'editar_usuario.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-users"></i> Usuários
                     </a>
-                    <a href="/limpar_sistema.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'limpar_sistema.php' ? 'active' : ''; ?> menu-item text-danger">
+                    <a href="limpar_sistema.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'limpar_sistema.php' ? 'active' : ''; ?> menu-item text-danger">
                         <i class="fas fa-trash-alt"></i> Limpar Sistema
                     </a>
                 <?php else: ?>
                     <!-- Menu de Operador de Caixa -->
-                    <a href="/vender.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'vender.php' ? 'active' : ''; ?> menu-item">
+                    <a href="vender.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'vender.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-shopping-cart"></i> Vender
                     </a>
-                    <a href="/lista_vendas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'lista_vendas.php' || basename($_SERVER['PHP_SELF']) == 'detalhes_venda.php' ? 'active' : ''; ?> menu-item">
+                    <a href="lista_vendas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'lista_vendas.php' || basename($_SERVER['PHP_SELF']) == 'detalhes_venda.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-receipt"></i> Minhas Vendas
                     </a>
-                    <a href="/sangrias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sangrias.php' ? 'active' : ''; ?> menu-item">
+                    <a href="sangrias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sangrias.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-money-bill-wave"></i> Sangrias
                     </a>
                 <?php endif; ?>
                 
-                <a href="/logout.php" class="mt-auto logout-btn menu-item">
+                <a href="logout.php" class="mt-auto logout-btn menu-item">
                     <i class="fas fa-sign-out-alt"></i> Sair
                 </a>
             </div>

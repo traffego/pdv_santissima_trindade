@@ -9,7 +9,10 @@ AddDefaultCharset UTF-8
 # PHP Session Settings
 php_value session.cookie_httponly 1
 php_value session.use_only_cookies 1
-php_value session.cookie_secure 1
+
+# Configurar cookie_secure apenas em produção
+SetEnvIf Host "localhost|127\.0\.0\.1" DEVELOPMENT
+php_value session.cookie_secure 0
 
 # Error Documents
 ErrorDocument 500 /error500.php
@@ -20,22 +23,29 @@ ErrorDocument 404 /error404.php
     Header set X-Content-Type-Options "nosniff"
     Header set X-XSS-Protection "1; mode=block"
     Header set X-Frame-Options "SAMEORIGIN"
+    
+    # Prevenir cache de redirecionamentos
+    Header always set Cache-Control "no-store, no-cache, must-revalidate"
+    Header always set Pragma "no-cache"
 </IfModule>
 
 # URL Rewriting
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteBase /pdv_santissima_trindade/
     
     # Remover 'checkout' da URL se presente
     RewriteCond %{THE_REQUEST} /checkout/([^\s?]*) [NC]
-    RewriteRule ^ /%1 [L,R=301,NE]
+    RewriteRule ^ %1 [L,R=301,NE]
     
     # Redirecionar internamente requisições para a pasta checkout
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ /checkout/$1 [L]
+    RewriteRule ^(.*)$ checkout/$1 [L]
     
-    # Redirect to HTTPS
+    # Redirect to HTTPS apenas em produção
+    RewriteCond %{HTTP_HOST} !^localhost [NC]
+    RewriteCond %{HTTP_HOST} !^127\.0\.0\.1$ [NC]
     RewriteCond %{HTTPS} off
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
     

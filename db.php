@@ -1,6 +1,6 @@
 <?php
 // Database configuration
-$host = 'localhost';
+$host = '187.33.241.40';
 $user = 'platafo5_pdv';
 $password = 'kqtnJ9laxto.';
 $database = 'platafo5_pdv';
