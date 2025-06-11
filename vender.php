@@ -181,7 +181,7 @@ if (isset($_SESSION['message']) && isset($_SESSION['message_type'])) {
                                  data-name="<?php echo strtolower($row['nome']); ?>"
                                  data-category="<?php echo strtolower($row['categoria_nome'] ?? ''); ?>">
                                 <div class="card h-100 product-card shadow-sm <?php echo ($row['quantidade_estoque'] <= 0) ? 'out-of-stock' : ''; ?>" 
-                                     style="border-left: 5px solid <?php echo $row['cor'] ?? '#eeeeee'; ?>; border-top: 1px solid #dee2e6; border-right: 1px solid #dee2e6; border-bottom: 1px solid #dee2e6;">
+                                     style="border-left: 10px solid <?php echo $row['cor'] ?? '#eeeeee'; ?>; border-top: 1px solid #dee2e6; border-right: 1px solid #dee2e6; border-bottom: 1px solid #dee2e6;">
                                     <div class="card-body p-3">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div class="product-info flex-grow-1 me-3">
@@ -991,6 +991,92 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
+/* Estilos gerais de produto */
+.product-card {
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.product-card .card-body {
+    padding: 0.5rem !important; /* Reduzindo o padding */
+}
+
+.product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+}
+
+.product-card .product-name {
+    font-weight: 600;
+    color: #333;
+    line-height: 1.2;
+    margin-bottom: 0.25rem; /* Reduzindo margem */
+    font-size: 0.9rem; /* Reduzindo tamanho da fonte */
+}
+
+.product-card .price-tag {
+    font-size: 1rem;
+    color: #2a5298 !important;
+    margin-bottom: 0.25rem; /* Reduzindo margem */
+}
+
+.product-card .stock-info {
+    font-size: 0.75rem; /* Reduzindo tamanho da fonte */
+}
+
+/* Estilo do botão de adicionar */
+.add-product-btn {
+    width: 32px !important; /* Tamanho fixo menor */
+    height: 32px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px !important; /* Cantos arredondados quadrados */
+    font-size: 14px !important; /* Ícone menor */
+    min-width: unset !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.add-product-btn:hover {
+    transform: scale(1.05);
+}
+
+.add-product-btn:active {
+    transform: scale(0.95);
+}
+
+/* Ajuste do espaçamento entre cards */
+.row.g-3 {
+    --bs-gutter-y: 0.75rem !important; /* Reduzindo espaço vertical entre cards */
+}
+
+.product-info {
+    min-width: 0; /* Permite que o texto seja truncado corretamente */
+}
+
+/* Ajuste para telas pequenas */
+@media (max-width: 576px) {
+    .product-card .card-body {
+        padding: 0.4rem !important;
+    }
+    
+    .product-card .product-name {
+        font-size: 0.85rem;
+    }
+    
+    .product-card .price-tag {
+        font-size: 0.9rem;
+    }
+    
+    .add-product-btn {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 12px !important;
+    }
+}
+
 /* Estilos gerais de produto */
 .product-card {
     transition: all 0.3s ease;
