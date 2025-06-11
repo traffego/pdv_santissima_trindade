@@ -274,7 +274,7 @@ unset($_SESSION['custom_body_class']);
                     <!-- Toggle button for cart items -->
                     <div id="cart-toggle" class="text-center mb-3" style="display: none;">
                         <button type="button" class="btn btn-sm btn-outline-primary toggle-cart-items">
-                            <span class="toggle-text">Ver todos</span>
+                            <span class="toggle-text">Ver todos</span> (<span class="total-items-count">0</span>)
                             <i class="fas fa-chevron-down toggle-icon"></i>
                         </button>
                     </div>
@@ -837,14 +837,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update cart total and toggle visibility
     function updateCartTotal() {
         let total = 0;
+        let totalItems = 0;
         
         for (const id in cartItems) {
             const item = cartItems[id];
             total += item.preco * item.quantidade;
+            totalItems += item.quantidade;
+        }
+        
+        // Atualizar contador de itens no botão de ver todos
+        const totalItemsCount = document.querySelector('.total-items-count');
+        if (totalItemsCount) {
+            totalItemsCount.textContent = totalItems;
         }
         
         cartTotal.textContent = `R$ ${formatPrice(total)}`;
         valorTotalInput.value = total.toFixed(2);
+        
+        // Adicionar classe de animação no mobile
+        if (window.innerWidth < 992) {
+            cartTotal.classList.add('total-bounce');
+            setTimeout(() => {
+                cartTotal.classList.remove('total-bounce');
+            }, 300);
+        }
         
         // Se o carrinho estiver vazio, garanta que o valor seja 0
         if (Object.keys(cartItems).length === 0) {
@@ -854,8 +870,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Show/hide toggle button based on number of items
-        const totalItems = Object.keys(cartItems).length;
-        cartToggle.style.display = totalItems > 2 ? 'block' : 'none';
+        const totalProducts = Object.keys(cartItems).length;
+        cartToggle.style.display = totalProducts > 2 ? 'block' : 'none';
     }
     
     // Format price
@@ -2032,6 +2048,21 @@ document.addEventListener('DOMContentLoaded', function() {
 #finalizar-venda:not(:disabled) {
     background-color: #198754 !important;
     border-color: #198754 !important;
+}
+
+@keyframes totalBounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+@media (max-width: 991px) {
+    .total-bounce {
+        animation: totalBounce 0.3s ease;
+    }
 }
 </style>
 
