@@ -180,7 +180,8 @@ if (isset($_SESSION['message']) && isset($_SESSION['message_type'])) {
                             <div class="col-12 col-md-4 col-xl-3 product-item" 
                                  data-name="<?php echo strtolower($row['nome']); ?>"
                                  data-category="<?php echo strtolower($row['categoria_nome'] ?? ''); ?>">
-                                <div class="card h-100 product-card shadow-sm <?php echo ($row['quantidade_estoque'] <= 0) ? 'out-of-stock' : ''; ?>">
+                                <div class="card h-100 product-card shadow-sm <?php echo ($row['quantidade_estoque'] <= 0) ? 'out-of-stock' : ''; ?>" 
+                                     style="border-left: 5px solid <?php echo $row['cor'] ?? '#eeeeee'; ?>; border-top: 1px solid #dee2e6; border-right: 1px solid #dee2e6; border-bottom: 1px solid #dee2e6;">
                                     <div class="card-body p-3">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div class="product-info flex-grow-1 me-3">
@@ -992,29 +993,51 @@ document.addEventListener('DOMContentLoaded', function() {
 <style>
 /* Estilos gerais de produto */
 .product-card {
-    border: 1px solid #dee2e6;
-    transition: all 0.2s;
-    background-color: #fff;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .product-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
 }
 
-.product-name {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #212529;
-    display: block;
-    line-height: 1.2;
+.product-card .card-body {
+    border-radius: 3px;
+    background: #fff;
 }
 
-.price-tag {
-    font-size: 0.95rem;
+.product-card.out-of-stock {
+    opacity: 0.7;
+    border-style: dashed !important;
+}
+
+.product-card .product-name {
     font-weight: 600;
-    color: #0d6efd;
-    line-height: 1;
+    color: #333;
+    line-height: 1.3;
+    margin-bottom: 0.5rem;
+}
+
+.product-card .price-tag {
+    font-size: 1.1rem;
+    color: #2a5298 !important;
+}
+
+.product-card .stock-info {
+    font-size: 0.85rem;
+}
+
+.product-card .stock-badge {
+    padding: 8px;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
 }
 
 .btn-circle {

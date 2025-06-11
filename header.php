@@ -474,14 +474,14 @@ date_default_timezone_set('America/Sao_Paulo'); ?>
                     
                     <!-- Menu Produtos com Submenu -->
                     <div class="menu-group">
-                        <a href="/produtos.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['produtos.php', 'adicionar_produto.php', 'editar_produto.php', 'categorias.php', 'editar_categoria.php']) ? 'active' : ''; ?> menu-item">
+                        <a href="produtos.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['produtos.php', 'adicionar_produto.php', 'editar_produto.php', 'categorias.php', 'editar_categoria.php']) ? 'active' : ''; ?> menu-item">
                             <i class="fas fa-box"></i> Produtos
                         </a>
                         <div class="submenu" style="padding-left: 20px;">
-                            <a href="/produtos/categorias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'categorias.php' ? 'active' : ''; ?> menu-item">
+                            <a href="produtos/categorias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'categorias.php' ? 'active' : ''; ?> menu-item">
                                 <i class="fas fa-tags"></i> Categorias
                             </a>
-                            <a href="/produtos/gerenciar_permissoes.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'gerenciar_permissoes.php' ? 'active' : ''; ?> menu-item">
+                            <a href="produtos/gerenciar_permissoes.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'gerenciar_permissoes.php' ? 'active' : ''; ?> menu-item">
                                 <i class="fas fa-key"></i> Permissões
                             </a>
                         </div>
