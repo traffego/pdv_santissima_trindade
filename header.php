@@ -444,7 +444,7 @@ date_default_timezone_set('America/Sao_Paulo'); ?>
         }
     </style>
 </head>
-<body>
+<body class="<?php echo isset($_SESSION['custom_body_class']) ? $_SESSION['custom_body_class'] : ''; ?>">
     <!-- Mobile menu toggle button -->
     <button id="mobile-menu-toggle" type="button" aria-label="Toggle menu">
         <i class="fas fa-bars"></i>

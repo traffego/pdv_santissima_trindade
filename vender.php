@@ -2,6 +2,9 @@
 require_once 'db.php';
 require_once 'check_login.php';
 
+// Adicionar classe específica para a página vender
+$_SESSION['custom_body_class'] = 'vender-page';
+
 // Verificar e definir número de caixa para administradores se não estiver definido
 if ($_SESSION['nivel'] === 'administrador' && (!isset($_SESSION['caixa_numero']) || empty($_SESSION['caixa_numero']))) {
     $_SESSION['caixa_numero'] = 999; // Número padrão para admin
@@ -32,38 +35,44 @@ if ($_SESSION['nivel'] === 'administrador') {
 
 include 'header.php';
 
-// Display messages if any
-if (isset($_SESSION['message']) && isset($_SESSION['message_type'])) {
-    echo '<div class="alert alert-' . $_SESSION['message_type'] . ' alert-dismissible fade show shadow server-alert" role="alert">
+// Limpar a classe após incluir o header
+unset($_SESSION['custom_body_class']);
+?>
+
+<!-- White header section - hidden on mobile -->
+<div class="d-none d-lg-block">
+    <?php if (isset($_SESSION['message']) && isset($_SESSION['message_type'])): ?>
+        <div class="alert alert-<?php echo $_SESSION['message_type']; ?> alert-dismissible fade show shadow server-alert" role="alert">
             <div class="d-flex align-items-center">
                 <div class="alert-icon me-3">
-                    <i class="fas ' . ($_SESSION['message_type'] == 'danger' ? 'fa-exclamation-triangle' : 'fa-info-circle') . ' fa-2x"></i>
+                    <i class="fas <?php echo ($_SESSION['message_type'] == 'danger' ? 'fa-exclamation-triangle' : 'fa-info-circle'); ?> fa-2x"></i>
                 </div>
                 <div class="alert-content">
-                    ' . $_SESSION['message'] . '
+                    <?php echo $_SESSION['message']; ?>
                 </div>
             </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>';
-    
-    // Clear session messages
-    unset($_SESSION['message']);
-    unset($_SESSION['message_type']);
-}
-?>
+        </div>
+        <?php
+        // Clear session messages
+        unset($_SESSION['message']);
+        unset($_SESSION['message_type']);
+        ?>
+    <?php endif; ?>
+</div>
 
-<!-- Header Section -->
-<div class="header-section mb-4">
+<!-- Blue header section - visible on all devices -->
+<div class="header-section mb-3">
     <div class="row g-0">
         <div class="col-md-8">
-            <div class="main-header p-4 rounded-start" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
+            <div class="main-header p-4 p-mobile-2 rounded-start" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
                 <div class="d-flex align-items-center">
-                    <div class="header-icon me-4">
+                    <div class="header-icon me-3 d-none d-sm-block">
                         <i class="fas fa-cash-register fa-2x text-white"></i>
                     </div>
                     <div class="text-white">
-                        <h3 class="mb-1 fw-bold">PONTO DE VENDA</h3>
-                        <p class="mb-0 opacity-75">
+                        <h3 class="mb-0 fw-bold h3-mobile">PONTO DE VENDA</h3>
+                        <p class="mb-0 opacity-75 small-mobile">
                             <?php if($_SESSION['nivel'] === 'administrador'): ?>
                                 <i class="fas fa-user-shield me-1"></i> Admin - Caixa <?php echo $_SESSION['caixa_numero']; ?>
                             <?php else: ?>
@@ -75,27 +84,27 @@ if (isset($_SESSION['message']) && isset($_SESSION['message_type'])) {
             </div>
         </div>
         <div class="col-md-4">
-            <div class="stats-header h-100 p-4 rounded-end" style="background: #2a5298;">
+            <div class="stats-header h-100 p-4 p-mobile-2 rounded-end" style="background: #2a5298;">
                 <div class="d-flex flex-column justify-content-center h-100">
-                    <div class="stat-item mb-3">
+                    <div class="stat-item mb-2 mb-md-3">
                         <div class="d-flex align-items-center">
-                            <div class="stat-icon me-3">
+                            <div class="stat-icon me-2 me-md-3">
                                 <i class="fas fa-clock fa-lg text-white"></i>
                             </div>
                             <div>
-                                <small class="text-white opacity-75 d-block">HORÁRIO ATUAL</small>
-                                <span id="current-time" class="text-white fw-bold"></span>
+                                <small class="text-white opacity-75 d-block small-mobile">HORÁRIO ATUAL</small>
+                                <span id="current-time" class="text-white fw-bold time-mobile"></span>
                             </div>
                         </div>
                     </div>
                     <div class="stat-item">
                         <div class="d-flex align-items-center">
-                            <div class="stat-icon me-3">
+                            <div class="stat-icon me-2 me-md-3">
                                 <i class="fas fa-calendar fa-lg text-white"></i>
                             </div>
                             <div>
-                                <small class="text-white opacity-75 d-block">DATA</small>
-                                <span id="current-date" class="text-white fw-bold"></span>
+                                <small class="text-white opacity-75 d-block small-mobile">DATA</small>
+                                <span id="current-date" class="text-white fw-bold date-mobile"></span>
                             </div>
                         </div>
                     </div>
@@ -104,6 +113,11 @@ if (isset($_SESSION['message']) && isset($_SESSION['message_type'])) {
         </div>
     </div>
 </div>
+
+<!-- Botão flutuante do menu -->
+<button type="button" class="btn btn-primary rounded-circle position-fixed d-lg-none" id="menu-button" style="top: 10px; right: 10px; width: 45px; height: 45px; z-index: 9999; display: flex !important; align-items: center; justify-content: center;">
+    <i class="fas fa-bars"></i>
+</button>
 
 <div class="row">
     <!-- Products Column -->
@@ -180,8 +194,14 @@ if (isset($_SESSION['message']) && isset($_SESSION['message_type'])) {
                             <div class="col-12 col-md-4 col-xl-3 product-item" 
                                  data-name="<?php echo strtolower($row['nome']); ?>"
                                  data-category="<?php echo strtolower($row['categoria_nome'] ?? ''); ?>">
-                                <div class="card h-100 product-card shadow-sm <?php echo ($row['quantidade_estoque'] <= 0) ? 'out-of-stock' : ''; ?>" 
-                                     style="border-left: 10px solid <?php echo $row['cor'] ?? '#eeeeee'; ?>; border-top: 1px solid #dee2e6; border-right: 1px solid #dee2e6; border-bottom: 1px solid #dee2e6;">
+                                <div class="card h-100 product-card shadow-sm <?php echo ($row['quantidade_estoque'] <= 0) ? 'out-of-stock' : 'product-card-clickable'; ?>" 
+                                     style="border-left: 10px solid <?php echo $row['cor'] ?? '#eeeeee'; ?>; border-top: 1px solid #dee2e6; border-right: 1px solid #dee2e6; border-bottom: 1px solid #dee2e6;"
+                                     <?php if ($row['quantidade_estoque'] > 0): ?>
+                                     data-id="<?php echo $row['id']; ?>"
+                                     data-nome="<?php echo htmlspecialchars($row['nome']); ?>"
+                                     data-preco="<?php echo $row['preco']; ?>"
+                                     data-estoque="<?php echo $row['quantidade_estoque']; ?>"
+                                     <?php endif; ?>>
                                     <div class="card-body p-3">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div class="product-info flex-grow-1 me-3">
@@ -202,15 +222,11 @@ if (isset($_SESSION['message']) && isset($_SESSION['message_type'])) {
                                                 </span>
                                             <?php else: ?>
                                                 <button type="button" 
-                                                    class="btn add-product-btn mobile-square-btn <?php echo ($row['quantidade_estoque'] <= 0) ? 'disabled' : 'add-product'; ?>"
-                                                    <?php if ($row['quantidade_estoque'] <= 0): ?>
-                                                    disabled title="Produto sem estoque"
-                                                    <?php else: ?>
+                                                    class="btn add-product-btn mobile-square-btn add-product"
                                                     data-id="<?php echo $row['id']; ?>"
                                                     data-nome="<?php echo htmlspecialchars($row['nome']); ?>"
                                                     data-preco="<?php echo $row['preco']; ?>"
-                                                    data-estoque="<?php echo $row['quantidade_estoque']; ?>"
-                                                    <?php endif; ?>>
+                                                    data-estoque="<?php echo $row['quantidade_estoque']; ?>">
                                                     <i class="fas fa-plus"></i>
                                                 </button>
                                             <?php endif; ?>
@@ -280,13 +296,13 @@ if (isset($_SESSION['message']) && isset($_SESSION['message_type'])) {
                         </label>
                         <div class="d-flex gap-2 payment-buttons">
                             <button type="button" class="btn btn-success flex-grow-1 payment-method-btn" data-method="Dinheiro">
-                                <i class="fas fa-money-bill-alt"></i><span class="d-none d-sm-inline ms-1">Dinheiro</span>
+                                <i class="fas fa-money-bill-alt"></i><span class="ms-1">Dinheiro</span>
                             </button>
                             <button type="button" class="btn btn-info flex-grow-1 payment-method-btn" data-method="Pix">
-                                <i class="fas fa-qrcode"></i><span class="d-none d-sm-inline ms-1">Pix</span>
+                                <i class="fas fa-qrcode"></i><span class="ms-1">Pix</span>
                             </button>
                             <button type="button" class="btn btn-warning flex-grow-1 payment-method-btn" data-method="Cartão">
-                                <i class="fas fa-credit-card"></i><span class="d-none d-sm-inline ms-1">Cartão</span>
+                                <i class="fas fa-credit-card"></i><span class="ms-1">Cartão</span>
                             </button>
                         </div>
                         <input type="hidden" name="forma_pagamento" id="forma_pagamento" required>
@@ -296,7 +312,7 @@ if (isset($_SESSION['message']) && isset($_SESSION['message_type'])) {
                     <input type="hidden" name="caixa" value="<?php echo $_SESSION['caixa_numero']; ?>">
                     <input type="hidden" name="usuario_id" value="<?php echo $_SESSION['usuario_id']; ?>">
                     
-                    <button type="submit" class="btn btn-success w-100 btn-lg d-flex align-items-center justify-content-center gap-2" id="finalizar-venda" disabled>
+                    <button type="submit" class="btn btn-secondary w-100 btn-lg d-flex align-items-center justify-content-center gap-2" id="finalizar-venda" disabled>
                         <i class="fas fa-check-circle"></i> Finalizar Venda
                     </button>
                 </form>
@@ -554,23 +570,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Payment method buttons
     paymentMethodButtons.forEach(button => {
         button.addEventListener('click', function() {
-            // Remove active class from all buttons
-            paymentMethodButtons.forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Add active class to clicked button
+            paymentMethodButtons.forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
-            
-            // Set the payment method value
             paymentMethodInput.value = this.dataset.method;
             
-            // Hide the required indicator
             if (paymentRequired) {
                 paymentRequired.style.display = 'none';
             }
             
-            // Enable finish button if cart is not empty
             updateFinishButton();
         });
     });
@@ -580,11 +587,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const cartHasItems = Object.keys(cartItems).length > 0;
         const paymentSelected = paymentMethodInput.value !== '';
         
+        finalizarVendaBtn.disabled = !(cartHasItems && paymentSelected);
+        
         if (cartHasItems && !paymentSelected && paymentRequired) {
             paymentRequired.style.display = 'inline';
         }
-        
-        finalizarVendaBtn.disabled = !(cartHasItems && paymentSelected);
     }
     
     // Search products
@@ -612,63 +619,63 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Add product to cart
-    document.querySelectorAll('.add-product').forEach(button => {
-        button.addEventListener('click', function() {
-            const id = this.dataset.id;
-            const nome = this.dataset.nome;
-            const preco = parseFloat(this.dataset.preco);
-            const estoque = parseInt(this.dataset.estoque);
-            
-            if (cartItems[id]) {
-                // Check stock before incrementing
-                if (cartItems[id].quantidade < estoque) {
-                    cartItems[id].quantidade++;
-                    updateCartItemDisplay(id);
-                    
-                    // Provide tactile feedback
-                    navigator.vibrate && navigator.vibrate(50);
-                } else {
-                    alert('Quantidade máxima em estoque atingida!');
-                }
-            } else {
-                cartItems[id] = {
-                    id: id,
-                    nome: nome,
-                    preco: preco,
-                    quantidade: 1
-                };
-                
-                // Create cart item element
-                createCartItemElement(id);
-                
-                // Provide tactile feedback
+    // Função para adicionar produto ao carrinho
+    function addProductToCart(productCard) {
+        const id = productCard.dataset.id;
+        const nome = productCard.dataset.nome;
+        const preco = parseFloat(productCard.dataset.preco);
+        const estoque = parseInt(productCard.dataset.estoque);
+        
+        if (cartItems[id]) {
+            if (cartItems[id].quantidade < estoque) {
+                cartItems[id].quantidade++;
+                updateCartItemDisplay(id);
                 navigator.vibrate && navigator.vibrate(50);
-                
-                // On mobile, show a brief indication that item was added
-                if (window.innerWidth < 992) {
-                    this.innerHTML = '<i class="fas fa-check"></i>';
-                    setTimeout(() => {
-                        this.innerHTML = '<i class="fas fa-plus"></i>';
-                    }, 500);
-                }
+            } else {
+                showErrorToast('Quantidade máxima em estoque atingida!');
             }
-            
-            updateCartTotal();
-            updateFinishButton();
-            
-            // Show cart on mobile when adding first item
-            if (Object.keys(cartItems).length === 1 && window.innerWidth < 992) {
-                cartContainer.classList.add('mobile-cart-visible');
-                
-                // Scroll to show the cart
-                setTimeout(() => {
-                    const mobileCartSpacer = document.querySelector('.mobile-cart-spacer');
-                    if (mobileCartSpacer) {
-                        mobileCartSpacer.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                    }
-                }, 100);
+        } else {
+            cartItems[id] = {
+                id: id,
+                nome: nome,
+                preco: preco,
+                quantidade: 1
+            };
+            createCartItemElement(id);
+            navigator.vibrate && navigator.vibrate(50);
+        }
+        
+        updateCartTotal();
+        updateFinishButton();
+        
+        if (Object.keys(cartItems).length === 1 && window.innerWidth < 992) {
+            cartContainer.classList.add('mobile-cart-visible');
+        }
+    }
+
+    // Adicionar evento de clique aos cards de produto
+    document.querySelectorAll('.product-card-clickable').forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Não adicionar se clicar no botão de adicionar
+            if (!e.target.closest('.add-product-btn')) {
+                addProductToCart(this);
             }
+        });
+    });
+
+    // Adicionar evento de clique aos botões de adicionar
+    document.querySelectorAll('.add-product-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation(); // Impedir que o clique propague para o card
+            const card = this.closest('.product-card');
+            addProductToCart(card);
+            
+            // Feedback visual no botão
+            const icon = this.querySelector('i');
+            icon.classList.replace('fa-plus', 'fa-check');
+            setTimeout(() => {
+                icon.classList.replace('fa-check', 'fa-plus');
+            }, 500);
         });
     });
     
@@ -987,6 +994,39 @@ document.addEventListener('DOMContentLoaded', function() {
         const caixaFechadoModal = new bootstrap.Modal(document.getElementById('caixaFechadoModal'));
         caixaFechadoModal.show();
     <?php endif; ?>
+
+    // Adicionar funcionalidade ao botão do menu
+    const menuButton = document.getElementById('menu-button');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.menu-overlay');
+
+    if (menuButton) {
+        menuButton.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+            this.classList.toggle('btn-danger');
+            
+            if (sidebar.classList.contains('active')) {
+                overlay.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                this.querySelector('i').classList.replace('fa-bars', 'fa-times');
+            } else {
+                overlay.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                this.querySelector('i').classList.replace('fa-times', 'fa-bars');
+            }
+        });
+    }
+
+    // Fechar menu ao clicar no overlay
+    if (overlay) {
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('active');
+            menuButton.classList.remove('btn-danger');
+            menuButton.querySelector('i').classList.replace('fa-times', 'fa-bars');
+            this.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+    }
 });
 </script>
 
@@ -1037,6 +1077,7 @@ document.addEventListener('DOMContentLoaded', function() {
     font-size: 14px !important; /* Ícone menor */
     min-width: unset !important;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+    z-index: 2;
 }
 
 .add-product-btn:hover {
@@ -1820,7 +1861,28 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .payment-buttons .btn {
-    border: 1px solid rgba(255,255,255,0.1);
+    padding: 10px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.payment-buttons .btn i {
+    font-size: 1.1rem;
+}
+
+@media (max-width: 380px) {
+    .payment-buttons .btn {
+        padding: 8px;
+        font-size: 0.8rem;
+    }
+    
+    .payment-buttons .btn i {
+        font-size: 1rem;
+    }
 }
 
 /* Mobile adjustments */
@@ -1847,6 +1909,129 @@ document.addEventListener('DOMContentLoaded', function() {
 /* Estilo para o handle do carrinho mobile */
 .mobile-cart-handle {
     background-color: rgba(255,255,255,0.2);
+}
+
+/* Ajustes para o cabeçalho no mobile */
+@media (max-width: 768px) {
+    .header-section {
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .p-mobile-2 {
+        padding: 0.75rem !important;
+    }
+    
+    .h3-mobile {
+        font-size: 1.25rem !important;
+        margin-bottom: 0.2rem !important;
+    }
+    
+    .small-mobile {
+        font-size: 0.75rem !important;
+    }
+    
+    .time-mobile, .date-mobile {
+        font-size: 0.85rem !important;
+    }
+    
+    .stat-item {
+        margin-bottom: 0.25rem !important;
+    }
+    
+    .stat-icon i {
+        font-size: 1rem !important;
+    }
+}
+
+/* Ocultar elementos do header padrão no mobile apenas na página vender */
+@media (max-width: 991px) {
+    .vender-page .d-md-flex,
+    .vender-page .page-title-mobile,
+    .vender-page hr,
+    .vender-page #mobile-menu-toggle {
+        display: none !important;
+    }
+    
+    /* Remover padding-top do container principal */
+    .vender-page .content {
+        padding-top: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    
+    /* Ajustar margem do header-section */
+    .vender-page .header-section {
+        margin: 0 !important;
+    }
+    
+    /* Remover border-radius no mobile */
+    .vender-page .main-header,
+    .vender-page .stats-header {
+        border-radius: 0 !important;
+    }
+}
+
+/* Estilo para cards clicáveis */
+.product-card-clickable {
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.product-card-clickable:active {
+    transform: scale(0.98) !important;
+}
+
+/* Remover hover effect em mobile */
+@media (max-width: 991px) {
+    .product-card:hover {
+        transform: none;
+    }
+    
+    .product-card-clickable:active {
+        background-color: rgba(13, 110, 253, 0.05);
+    }
+}
+
+/* Estilo para as formas de pagamento aceitas */
+.payment-methods-info {
+    display: none;
+}
+
+.payment-method-label {
+    display: flex;
+    align-items: center;
+    opacity: 0.8;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+.payment-method-label i {
+    font-size: 1rem;
+}
+
+@media (max-width: 991px) {
+    .payment-methods-info {
+        background-color: rgba(255,255,255,0.05) !important;
+    }
+    
+    .payment-method-label {
+        font-size: 0.7rem;
+    }
+    
+    .payment-method-label i {
+        font-size: 0.9rem;
+    }
+}
+
+/* Estilo do botão de finalizar */
+#finalizar-venda {
+    transition: all 0.3s ease;
+}
+
+#finalizar-venda:not(:disabled) {
+    background-color: #198754 !important;
+    border-color: #198754 !important;
 }
 </style>
 
