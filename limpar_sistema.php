@@ -1,7 +1,15 @@
 <?php
 session_start();
 require_once 'db.php';
-require_once 'check_admin.php'; // Garante que apenas administradores acessem
+require_once 'check_login.php';
+
+// Verificar se o usuário é administrador
+if ($_SESSION['nivel'] !== 'administrador') {
+    $_SESSION['message'] = 'Acesso negado. Apenas administradores podem acessar esta página.';
+    $_SESSION['message_type'] = 'danger';
+    header('Location: index.php');
+    exit;
+}
 
 // Verifica se é uma requisição POST e se o token CSRF é válido
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['csrf_token'])) {

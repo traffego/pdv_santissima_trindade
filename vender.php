@@ -355,6 +355,29 @@ if (isset($_SESSION['message']) && isset($_SESSION['message_type'])) {
   </div>
 </div>
 
+<!-- Modal de Caixa Fechado -->
+<div class="modal fade" id="caixaFechadoModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="caixaFechadoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning">
+        <h5 class="modal-title" id="caixaFechadoModalLabel">
+            <i class="fas fa-exclamation-triangle me-2"></i> Caixa Fechado
+        </h5>
+      </div>
+      <div class="modal-body text-center">
+        <div class="display-1 text-warning mb-3">
+          <i class="fas fa-cash-register"></i>
+        </div>
+        <h4>Não é possível realizar vendas com o caixa fechado!</h4>
+        <p class="lead mb-4">Para iniciar as vendas, é necessário abrir o caixa primeiro.</p>
+        <a href="controle_caixa.php" class="btn btn-lg btn-warning">
+          <i class="fas fa-door-open me-2"></i>ABRIR CAIXA AGORA
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 // Atualizar data e hora em tempo real
 function updateDateTime() {
@@ -939,6 +962,30 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
+
+    <?php
+    // Verificar se o caixa está fechado
+    $sql_check_caixa = "SELECT status FROM controle_caixa 
+                        WHERE usuario_id = ? 
+                        AND DATE(data_abertura) = CURRENT_DATE 
+                        ORDER BY id DESC LIMIT 1";
+    $stmt_check = mysqli_prepare($conn, $sql_check_caixa);
+    mysqli_stmt_bind_param($stmt_check, "i", $_SESSION['usuario_id']);
+    mysqli_stmt_execute($stmt_check);
+    $result_check = mysqli_stmt_get_result($stmt_check);
+    $caixa_status = '';
+    
+    if ($row_check = mysqli_fetch_assoc($result_check)) {
+        $caixa_status = $row_check['status'];
+    } else {
+        $caixa_status = 'fechado';
+    }
+    
+    if ($caixa_status !== 'aberto'): ?>
+        // Mostrar modal de caixa fechado
+        const caixaFechadoModal = new bootstrap.Modal(document.getElementById('caixaFechadoModal'));
+        caixaFechadoModal.show();
+    <?php endif; ?>
 });
 </script>
 

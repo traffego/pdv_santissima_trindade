@@ -542,9 +542,6 @@ date_default_timezone_set('America/Sao_Paulo'); ?>
                     <a href="usuarios.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'usuarios.php' || basename($_SERVER['PHP_SELF']) == 'adicionar_usuario.php' || basename($_SERVER['PHP_SELF']) == 'editar_usuario.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-users"></i> Usuários
                     </a>
-                    <a href="limpar_sistema.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'limpar_sistema.php' ? 'active' : ''; ?> menu-item text-danger">
-                        <i class="fas fa-trash-alt"></i> Limpar Sistema
-                    </a>
                 <?php endif; ?>
                 
                 <a href="logout.php" class="mt-auto logout-btn menu-item">
