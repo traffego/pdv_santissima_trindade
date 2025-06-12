@@ -280,9 +280,14 @@ unset($_SESSION['custom_body_class']);
                     </div>
                     
                     <div class="total-section">
-                        <div class="d-flex justify-content-between align-items-center bg-dark text-white p-2 rounded-pill">
-                            <span class="ms-3">Total:</span>
-                            <span id="cart-total" class="fs-5 fw-bold me-3">R$ 0,00</span>
+                        <div class="d-flex justify-content-center align-items-center bg-dark text-white p-2 rounded-pill">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <span>Total:</span>
+                                <span id="cart-total" class="fs-5 fw-bold ms-2">R$ 0,00</span>
+                                <span id="doacao-label" class="ms-2 badge bg-success" style="display: none;">
+                                    <i class="fas fa-hand-holding-heart me-1"></i>DOAÇÃO
+                                </span>
+                            </div>
                             <input type="hidden" name="valor_total" id="valor_total_input" value="0">
                         </div>
                     </div>
@@ -307,6 +312,178 @@ unset($_SESSION['custom_body_class']);
                         </div>
                         <input type="hidden" name="forma_pagamento" id="forma_pagamento" required>
                     </div>
+                    
+                    <?php if ($_SESSION['nivel'] === 'administrador'): ?>
+                    <div class="mb-3">
+                        <label class="form-label d-flex justify-content-between">
+                            <span>Tipo de Venda</span>
+                            <span class="text-danger tipo-required fw-bold" style="display: none;">
+                                <i class="fas fa-exclamation-circle"></i> SELECIONE UM TIPO
+                            </span>
+                        </label>
+                        <div class="d-flex gap-2 tipo-buttons">
+                            <button type="button" class="btn btn-outline-primary flex-grow-1 tipo-venda-btn active" data-tipo="comum">
+                                <i class="fas fa-shopping-basket"></i><span class="ms-1">Comum</span>
+                            </button>
+                            <button type="button" class="btn btn-outline-success flex-grow-1 tipo-venda-btn" data-tipo="doacao">
+                                <i class="fas fa-hand-holding-heart"></i><span class="ms-1">Doação</span>
+                            </button>
+                            <button type="button" class="btn btn-outline-danger flex-grow-1 tipo-venda-btn" data-tipo="perda">
+                                <i class="fas fa-times-circle"></i><span class="ms-1">Perda</span>
+                            </button>
+                            <button type="button" class="btn btn-outline-warning flex-grow-1 tipo-venda-btn" data-tipo="devolucao">
+                                <i class="fas fa-undo"></i><span class="ms-1">Devolução</span>
+                            </button>
+                        </div>
+                        <input type="hidden" name="tipo" id="tipo_venda" value="comum">
+                    </div>
+                    <script>
+                    // Script para alternar seleção de tipo de venda
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const tipoBtns = document.querySelectorAll('.tipo-venda-btn');
+                        const tipoInput = document.getElementById('tipo_venda');
+                        const cartTotal = document.getElementById('cart-total');
+                        const valorTotalInput = document.getElementById('valor_total_input');
+                        const doacaoLabel = document.getElementById('doacao-label');
+                        let originalTotal = 0;
+                        let originalItemPrices = {};
+
+                        tipoBtns.forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                tipoBtns.forEach(b => b.classList.remove('active'));
+                                this.classList.add('active');
+                                const selectedTipo = this.getAttribute('data-tipo');
+                                tipoInput.value = selectedTipo;
+
+                                // Se for doação ou perda, salvar o valor original e mostrar 0
+                                if (selectedTipo === 'doacao' || selectedTipo === 'perda') {
+                                    originalTotal = parseFloat(valorTotalInput.value);
+                                    cartTotal.textContent = 'R$ 0,00';
+                                    valorTotalInput.value = '0.00';
+                                    doacaoLabel.style.display = 'inline-flex';
+                                    doacaoLabel.innerHTML = selectedTipo === 'doacao' ? 
+                                        '<i class="fas fa-hand-holding-heart me-1"></i>DOAÇÃO' : 
+                                        '<i class="fas fa-times-circle me-1"></i>PERDA';
+                                    doacaoLabel.className = 'ms-2 badge ' + 
+                                        (selectedTipo === 'doacao' ? 'bg-success' : 'bg-danger');
+
+                                    // Restaurar preços originais dos itens
+                                    document.querySelectorAll('.cart-item').forEach(item => {
+                                        const itemId = item.dataset.id;
+                                        if (originalItemPrices[itemId]) {
+                                            const itemPrice = item.querySelector('.item-price');
+                                            const quantidade = parseInt(item.querySelector('.item-quantity').value);
+                                            const precoUnitario = originalItemPrices[itemId];
+                                            itemPrice.textContent = `R$ ${formatPrice(precoUnitario * quantidade)}`;
+                                        }
+                                    });
+                                } else if (selectedTipo === 'devolucao') {
+                                    // Para devolução, salvar os preços originais e mostrar negativos
+                                    document.querySelectorAll('.cart-item').forEach(item => {
+                                        const itemId = item.dataset.id;
+                                        const itemPrice = item.querySelector('.item-price');
+                                        const quantidade = parseInt(item.querySelector('.item-quantity').value);
+                                        const precoUnitario = parseFloat(itemPrice.textContent.replace('R$ ', '').replace(',', '.')) / quantidade;
+                                        
+                                        // Salvar preço original se ainda não foi salvo
+                                        if (!originalItemPrices[itemId]) {
+                                            originalItemPrices[itemId] = precoUnitario;
+                                        }
+                                        
+                                        // Mostrar preço negativo
+                                        itemPrice.textContent = `R$ ${formatPrice(-precoUnitario * quantidade)}`;
+                                    });
+
+                                    // Atualizar total
+                                    let total = 0;
+                                    document.querySelectorAll('.cart-item').forEach(item => {
+                                        const itemPrice = item.querySelector('.item-price');
+                                        total += parseFloat(itemPrice.textContent.replace('R$ ', '').replace(',', '.'));
+                                    });
+
+                                    cartTotal.textContent = `R$ ${formatPrice(total)}`;
+                                    valorTotalInput.value = total.toFixed(2);
+                                    doacaoLabel.style.display = 'inline-flex';
+                                    doacaoLabel.innerHTML = '<i class="fas fa-undo me-1"></i>DEVOLUÇÃO';
+                                    doacaoLabel.className = 'ms-2 badge bg-warning';
+                                } else {
+                                    // Se não for nenhum dos tipos especiais e tiver um valor original salvo, restaurar
+                                    if (originalTotal > 0) {
+                                        cartTotal.textContent = `R$ ${formatPrice(originalTotal)}`;
+                                        valorTotalInput.value = originalTotal.toFixed(2);
+                                    }
+
+                                    // Restaurar preços originais dos itens
+                                    document.querySelectorAll('.cart-item').forEach(item => {
+                                        const itemId = item.dataset.id;
+                                        if (originalItemPrices[itemId]) {
+                                            const itemPrice = item.querySelector('.item-price');
+                                            const quantidade = parseInt(item.querySelector('.item-quantity').value);
+                                            const precoUnitario = originalItemPrices[itemId];
+                                            itemPrice.textContent = `R$ ${formatPrice(precoUnitario * quantidade)}`;
+                                        }
+                                    });
+
+                                    doacaoLabel.style.display = 'none';
+                                }
+
+                                // Após trocar o tipo, atualizar todos os itens do carrinho
+                                Object.keys(cartItems).forEach(id => updateCartItemDisplay(id));
+                            });
+                        });
+
+                        // Adicionar validação no envio do formulário
+                        document.getElementById('cart-form').addEventListener('submit', function(e) {
+                            const selectedTipo = tipoInput.value;
+                            if (selectedTipo === 'doacao' || selectedTipo === 'perda') {
+                                // Garantir que o valor total seja zero para doações e perdas
+                                valorTotalInput.value = '0.00';
+                            } else if (selectedTipo === 'devolucao') {
+                                // Garantir que o valor total seja negativo para devoluções
+                                const currentTotal = parseFloat(valorTotalInput.value);
+                                if (currentTotal > 0) {
+                                    valorTotalInput.value = (-currentTotal).toFixed(2);
+                                }
+                            }
+                        });
+
+                        // Atualizar a função updateCartItemDisplay para considerar o tipo de venda
+                        function updateCartItemDisplay(id) {
+                            const item = cartItems[id];
+                            const cartItemEl = document.querySelector(`.cart-item[data-id="${id}"]`);
+                            const selectedTipo = document.getElementById('tipo_venda').value;
+                            
+                            cartItemEl.querySelector('.item-quantity').value = item.quantidade;
+                            const precoTotal = item.preco * item.quantidade;
+                            
+                            if (selectedTipo === 'devolucao') {
+                                cartItemEl.querySelector('.item-price').textContent = `R$ ${formatPrice(-precoTotal)}`;
+                            } else {
+                                cartItemEl.querySelector('.item-price').textContent = `R$ ${formatPrice(precoTotal)}`;
+                            }
+                            
+                            // Atualizar o total do carrinho sempre que um item for atualizado
+                            updateCartTotalWithTipo();
+                        }
+
+                        // Nova função para atualizar o total considerando o tipo de venda
+                        function updateCartTotalWithTipo() {
+                            const selectedTipo = document.getElementById('tipo_venda').value;
+                            let total = 0;
+                            for (const id in cartItems) {
+                                const item = cartItems[id];
+                                let preco = item.preco * item.quantidade;
+                                if (selectedTipo === 'devolucao') {
+                                    preco = -preco;
+                                }
+                                total += preco;
+                            }
+                            document.getElementById('cart-total').textContent = `R$ ${formatPrice(total)}`;
+                            document.getElementById('valor_total_input').value = total.toFixed(2);
+                        }
+                    });
+                    </script>
+                    <?php endif; ?>
                     
                     <!-- Hidden input for cashier from session -->
                     <input type="hidden" name="caixa" value="<?php echo $_SESSION['caixa_numero']; ?>">
@@ -396,6 +573,11 @@ unset($_SESSION['custom_body_class']);
 </div>
 
 <script>
+// Função global para formatar preço
+function formatPrice(price) {
+    return price.toFixed(2).replace('.', ',');
+}
+
 // Atualizar data e hora em tempo real
 function updateDateTime() {
     const now = new Date();
@@ -829,9 +1011,19 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateCartItemDisplay(id) {
         const item = cartItems[id];
         const cartItemEl = document.querySelector(`.cart-item[data-id="${id}"]`);
+        const selectedTipo = document.getElementById('tipo_venda').value;
         
         cartItemEl.querySelector('.item-quantity').value = item.quantidade;
-        cartItemEl.querySelector('.item-price').textContent = `R$ ${formatPrice(item.preco * item.quantidade)}`;
+        const precoTotal = item.preco * item.quantidade;
+        
+        if (selectedTipo === 'devolucao') {
+            cartItemEl.querySelector('.item-price').textContent = `R$ ${formatPrice(-precoTotal)}`;
+        } else {
+            cartItemEl.querySelector('.item-price').textContent = `R$ ${formatPrice(precoTotal)}`;
+        }
+        
+        // Atualizar o total do carrinho sempre que um item for atualizado
+        updateCartTotalWithTipo();
     }
     
     // Update cart total and toggle visibility
@@ -905,9 +1097,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 3000);
         }
         
-        // Verificar se o valor total é válido
+        // Verificar se o valor total é válido (apenas se não for doação, perda ou devolução)
         const totalValue = parseFloat(valorTotalInput.value);
-        if (totalValue <= 0) {
+        const selectedTipo = document.getElementById('tipo_venda').value;
+        if (selectedTipo !== 'doacao' && selectedTipo !== 'perda' && selectedTipo !== 'devolucao' && totalValue <= 0) {
             errors.push('O valor total da venda deve ser maior que zero');
         }
         
@@ -2063,6 +2256,51 @@ document.addEventListener('DOMContentLoaded', function() {
 @media (max-width: 991px) {
     .total-bounce {
         animation: totalBounce 0.3s ease;
+    }
+}
+
+/* Estilo para o label de doação */
+#doacao-label {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Ajuste para o total em mobile */
+@media (max-width: 991px) {
+    #doacao-label {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.4rem;
+    }
+}
+
+/* Ajustes para centralização do total */
+.total-section .bg-dark {
+    min-width: 200px;
+    margin: 0 auto;
+}
+
+.total-section .d-flex {
+    width: 100%;
+}
+
+@media (max-width: 991px) {
+    .total-section .bg-dark {
+        min-width: 180px;
     }
 }
 </style>

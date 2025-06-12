@@ -42,10 +42,11 @@ $usuario_id = $_SESSION['usuario_id']; // Get user ID from session
 $produto_ids = isset($_POST['produto_id']) ? $_POST['produto_id'] : [];
 $quantidades = isset($_POST['quantidade']) ? $_POST['quantidade'] : [];
 $precos = isset($_POST['preco']) ? $_POST['preco'] : [];
+$tipo = isset($_POST['tipo']) ? mysqli_real_escape_string($conn, $_POST['tipo']) : 'comum';
 
 // Debug information
 $missing_fields = [];
-if (empty($valor_total) || $valor_total <= 0) $missing_fields[] = 'Total da venda';
+if (empty($valor_total)) $missing_fields[] = 'Total da venda';
 if (empty($forma_pagamento)) $missing_fields[] = 'Forma de pagamento';
 if (empty($caixa)) $missing_fields[] = 'Número do caixa';
 if (empty($produto_ids)) $missing_fields[] = 'Produtos no carrinho';
@@ -66,14 +67,22 @@ if (count($produto_ids) == 0) {
     exit;
 }
 
+// Verificar valor total apenas se não for doação, perda ou devolução
+if ($tipo !== 'doacao' && $tipo !== 'perda' && $tipo !== 'devolucao' && $valor_total <= 0) {
+    $_SESSION['message'] = '<strong>ATENÇÃO!</strong> O valor total da venda deve ser maior que zero.';
+    $_SESSION['message_type'] = 'danger';
+    header('Location: vender.php');
+    exit;
+}
+
 // Start transaction
 mysqli_begin_transaction($conn);
 
 try {
     // Insert sale
-    $sql = "INSERT INTO vendas (data_venda, valor_total, forma_pagamento, caixa, usuario_id, controle_caixa_id) VALUES (NOW(), ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO vendas (data_venda, valor_total, forma_pagamento, caixa, usuario_id, controle_caixa_id, tipo) VALUES (NOW(), ?, ?, ?, ?, ?, ?)";
     $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, "dsiii", $valor_total, $forma_pagamento, $caixa, $usuario_id, $controle_caixa_id);
+    mysqli_stmt_bind_param($stmt, "dsiiis", $valor_total, $forma_pagamento, $caixa, $usuario_id, $controle_caixa_id, $tipo);
     mysqli_stmt_execute($stmt);
     
     // Get the sale ID
@@ -85,16 +94,18 @@ try {
         $preco = $precos[$index];
         
         if ($quantidade > 0) {
-            // Check if there's enough stock
-            $check_sql = "SELECT quantidade_estoque FROM produtos WHERE id = ?";
-            $check_stmt = mysqli_prepare($conn, $check_sql);
-            mysqli_stmt_bind_param($check_stmt, 'i', $produto_id);
-            mysqli_stmt_execute($check_stmt);
-            $check_result = mysqli_stmt_get_result($check_stmt);
-            $produto = mysqli_fetch_assoc($check_result);
-            
-            if (!$produto || $produto['quantidade_estoque'] < $quantidade) {
-                throw new Exception('Estoque insuficiente para um ou mais produtos.');
+            // Check if there's enough stock (only for non-return sales)
+            if ($tipo !== 'devolucao') {
+                $check_sql = "SELECT quantidade_estoque FROM produtos WHERE id = ?";
+                $check_stmt = mysqli_prepare($conn, $check_sql);
+                mysqli_stmt_bind_param($check_stmt, 'i', $produto_id);
+                mysqli_stmt_execute($check_stmt);
+                $check_result = mysqli_stmt_get_result($check_stmt);
+                $produto = mysqli_fetch_assoc($check_result);
+                
+                if (!$produto || $produto['quantidade_estoque'] < $quantidade) {
+                    throw new Exception('Estoque insuficiente para um ou mais produtos.');
+                }
             }
             
             // Insert sale item
@@ -104,7 +115,13 @@ try {
             mysqli_stmt_execute($item_stmt);
             
             // Update product stock
-            $update_sql = "UPDATE produtos SET quantidade_estoque = quantidade_estoque - ? WHERE id = ?";
+            if ($tipo === 'devolucao') {
+                // For returns, add the quantity back to stock
+                $update_sql = "UPDATE produtos SET quantidade_estoque = quantidade_estoque + ? WHERE id = ?";
+            } else {
+                // For other types, subtract from stock
+                $update_sql = "UPDATE produtos SET quantidade_estoque = quantidade_estoque - ? WHERE id = ?";
+            }
             $update_stmt = mysqli_prepare($conn, $update_sql);
             mysqli_stmt_bind_param($update_stmt, 'ii', $quantidade, $produto_id);
             mysqli_stmt_execute($update_stmt);
@@ -131,7 +148,8 @@ try {
     mysqli_commit($conn);
     
     // Preparar mensagem de sucesso formatada
-    $_SESSION['message'] = '<strong>Venda Realizada!</strong> A venda #' . $venda_id . ' foi processada com sucesso.';
+    $mensagem = $tipo === 'devolucao' ? 'Devolução' : 'Venda';
+    $_SESSION['message'] = '<strong>' . $mensagem . ' Realizada!</strong> A ' . strtolower($mensagem) . ' #' . $venda_id . ' foi processada com sucesso.';
     $_SESSION['message_type'] = 'success';
     $_SESSION['venda_concluida'] = true;
     $_SESSION['venda_id'] = $venda_id;
@@ -144,7 +162,7 @@ try {
     // Rollback the transaction on error
     mysqli_rollback($conn);
     
-    $_SESSION['message'] = 'Erro ao processar venda: ' . $e->getMessage();
+    $_SESSION['message'] = 'Erro ao processar ' . ($tipo === 'devolucao' ? 'devolução' : 'venda') . ': ' . $e->getMessage();
     $_SESSION['message_type'] = 'danger';
     
     header('Location: vender.php');

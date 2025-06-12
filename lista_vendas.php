@@ -198,6 +198,7 @@ if ($_SESSION['nivel'] === 'administrador') {
                                 <th>Caixa</th>
                                 <?php if ($_SESSION['nivel'] === 'administrador'): ?>
                                 <th>Operador</th>
+                                <th>Tipo</th>
                                 <?php endif; ?>
                                 <th>Ações</th>
                             </tr>
@@ -236,6 +237,37 @@ if ($_SESSION['nivel'] === 'administrador') {
                                 </td>
                                 <?php if ($_SESSION['nivel'] === 'administrador'): ?>
                                 <td><?php echo $venda['nome_usuario']; ?></td>
+                                <td>
+                                    <?php
+                                    $tipo_badge_class = '';
+                                    $tipo_icon = '';
+                                    switch($venda['tipo']) {
+                                        case 'comum':
+                                            $tipo_badge_class = 'bg-primary';
+                                            $tipo_icon = 'fa-shopping-basket';
+                                            break;
+                                        case 'doacao':
+                                            $tipo_badge_class = 'bg-success';
+                                            $tipo_icon = 'fa-hand-holding-heart';
+                                            break;
+                                        case 'perda':
+                                            $tipo_badge_class = 'bg-danger';
+                                            $tipo_icon = 'fa-times-circle';
+                                            break;
+                                        case 'devolucao':
+                                            $tipo_badge_class = 'bg-warning text-dark';
+                                            $tipo_icon = 'fa-undo';
+                                            break;
+                                        default:
+                                            $tipo_badge_class = 'bg-secondary';
+                                            $tipo_icon = 'fa-question-circle';
+                                    }
+                                    ?>
+                                    <span class="badge <?php echo $tipo_badge_class; ?>">
+                                        <i class="fas <?php echo $tipo_icon; ?> me-1"></i>
+                                        <?php echo ucfirst($venda['tipo']); ?>
+                                    </span>
+                                </td>
                                 <?php endif; ?>
                                 <td>
                                     <div class="btn-group btn-group-sm">
