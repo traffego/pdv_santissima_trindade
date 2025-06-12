@@ -1,0 +1,2 @@
+@echo off
+"C:\xampp\mysql\bin\mysql.exe" -u root pdv -e "ALTER TABLE controle_caixa ADD COLUMN IF NOT EXISTS valor_dinheiro decimal(10,2) DEFAULT NULL, ADD COLUMN IF NOT EXISTS valor_pix decimal(10,2) DEFAULT NULL, ADD COLUMN IF NOT EXISTS valor_cartao decimal(10,2) DEFAULT NULL, ADD COLUMN IF NOT EXISTS diferenca decimal(10,2) DEFAULT NULL, ADD COLUMN IF NOT EXISTS observacoes_fechamento text DEFAULT NULL;" 

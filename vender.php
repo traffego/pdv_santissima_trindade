@@ -991,10 +991,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Verificar se o caixa está fechado
     $sql_check_caixa = "SELECT status FROM controle_caixa 
                         WHERE usuario_id = ? 
-                        AND DATE(data_abertura) = CURRENT_DATE 
+                        AND caixa_numero = ? 
+                        AND status = 'aberto'
                         ORDER BY id DESC LIMIT 1";
     $stmt_check = mysqli_prepare($conn, $sql_check_caixa);
-    mysqli_stmt_bind_param($stmt_check, "i", $_SESSION['usuario_id']);
+    mysqli_stmt_bind_param($stmt_check, "ii", $_SESSION['usuario_id'], $_SESSION['caixa_numero']);
     mysqli_stmt_execute($stmt_check);
     $result_check = mysqli_stmt_get_result($stmt_check);
     $caixa_status = '';

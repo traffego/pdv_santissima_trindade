@@ -55,10 +55,10 @@ if ($row = mysqli_fetch_assoc($result)) {
     // Buscar sangrias relacionadas
     $sql_sangrias = "SELECT 
         s.*,
-        DATE_FORMAT(s.data_sangria, '%d/%m/%Y %H:%i') as data_formatada
+        DATE_FORMAT(s.data, '%d/%m/%Y %H:%i') as data_formatada
     FROM sangrias s
     WHERE s.controle_caixa_id = ?
-    ORDER BY s.data_sangria";
+    ORDER BY s.data";
     
     $stmt_sangrias = mysqli_prepare($conn, $sql_sangrias);
     mysqli_stmt_bind_param($stmt_sangrias, "i", $id);

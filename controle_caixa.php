@@ -388,7 +388,12 @@ include 'header.php';
                                     <label class="form-label">Total em PIX</label>
                                     <div class="input-group">
                                         <span class="input-group-text">R$</span>
-                                        <input type="text" class="form-control" value="<?php echo number_format($vendas_por_pagamento['Pix'] ?? 0, 2, ',', '.'); ?>" readonly>
+                                        <input type="number" 
+                                               step="0.01" 
+                                               class="form-control" 
+                                               name="valor_pix" 
+                                               value="<?php echo number_format($vendas_por_pagamento['Pix'] ?? 0, 2, '.', ''); ?>"
+                                               readonly>
                                     </div>
                                 </div>
                             </div>
@@ -397,15 +402,16 @@ include 'header.php';
                                     <label class="form-label">Total em Cartão</label>
                                     <div class="input-group">
                                         <span class="input-group-text">R$</span>
-                                        <input type="text" class="form-control" value="<?php echo number_format($vendas_por_pagamento['Cartão'] ?? 0, 2, ',', '.'); ?>" readonly>
+                                        <input type="number" 
+                                               step="0.01" 
+                                               class="form-control" 
+                                               name="valor_cartao" 
+                                               value="<?php echo number_format($vendas_por_pagamento['Cartão'] ?? 0, 2, '.', ''); ?>"
+                                               readonly>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Campos ocultos com os valores de PIX e Cartão -->
-                        <input type="hidden" name="valor_pix" value="<?php echo number_format($vendas_por_pagamento['Pix'] ?? 0, 2, '.', ''); ?>">
-                        <input type="hidden" name="valor_cartao" value="<?php echo number_format($vendas_por_pagamento['Cartão'] ?? 0, 2, '.', ''); ?>">
 
                         <div class="mb-3">
                             <label class="form-label">Observações</label>

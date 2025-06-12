@@ -1,0 +1,42 @@
+[2025-06-12 19:30:10] Dados recebidos: caixa_id=8, valor_dinheiro=10.00, valor_pix=0.00, valor_cartao=0.00
+[2025-06-12 19:30:10] Caixa encontrado: {"id":8,"usuario_id":13,"caixa_numero":12,"data_abertura":"2025-06-11 15:55:59","data_fechamento":null,"valor_inicial":"0.00","valor_final":null,"valor_sangrias":"0.00","valor_vendas":"30.00","valor_vendas_dinheiro":"0.00","valor_vendas_pix":"0.00","valor_vendas_cartao":"0.00","status":"aberto","observacoes":""}
+[2025-06-12 19:30:10] Totais calculados: {"total_dinheiro":"10.00","total_pix":"0.00","total_cartao":"0.00","total_geral":"10.00"}
+[2025-06-12 19:30:11] Total sangrias: {"total_sangrias":"0.00"}
+[2025-06-12 19:30:11] Valor esperado: 10, Diferença: 0
+[2025-06-12 19:30:11] Erro ao fechar o caixa: Unknown column 'valor_dinheiro' in 'SET'
+[2025-06-12 19:54:34] Dados recebidos: caixa_id=20, valor_dinheiro=0.00, valor_pix=0.00, valor_cartao=0.00
+[2025-06-12 19:54:34] Caixa encontrado: {"id":20,"usuario_id":13,"caixa_numero":12,"data_abertura":"2025-06-12 14:54:21","data_fechamento":null,"valor_inicial":"0.00","valor_final":null,"valor_sangrias":"0.00","valor_vendas":"0.00","valor_vendas_dinheiro":"0.00","valor_vendas_pix":"0.00","valor_vendas_cartao":"0.00","status":"aberto","observacoes":"","valor_dinheiro":null,"valor_pix":null,"valor_cartao":null,"diferenca":null,"observacoes_fechamento":null}
+[2025-06-12 19:54:34] Totais calculados: {"total_dinheiro":"0.00","total_pix":"0.00","total_cartao":"0.00","total_geral":"0.00"}
+[2025-06-12 19:54:34] Total sangrias: {"total_sangrias":"0.00"}
+[2025-06-12 19:54:34] Valor esperado: 0, Diferença: 0
+[2025-06-12 19:54:34] Erro ao fechar o caixa: Unknown column 'valor_total' in 'SET'
+[2025-06-12 20:00:56] Dados recebidos: caixa_id=20, valor_dinheiro=0.00, valor_pix=0.00, valor_cartao=0.00
+[2025-06-12 20:00:56] Caixa encontrado: {"id":20,"usuario_id":13,"caixa_numero":12,"data_abertura":"2025-06-12 14:54:21","data_fechamento":null,"valor_inicial":"0.00","valor_final":null,"valor_sangrias":"0.00","valor_vendas":"0.00","valor_vendas_dinheiro":"0.00","valor_vendas_pix":"0.00","valor_vendas_cartao":"0.00","status":"aberto","observacoes":"","valor_dinheiro":null,"valor_pix":null,"valor_cartao":null,"diferenca":null,"observacoes_fechamento":null}
+[2025-06-12 20:00:56] Totais calculados: {"total_dinheiro":"0.00","total_pix":"0.00","total_cartao":"0.00","total_geral":"0.00"}
+[2025-06-12 20:00:56] Total sangrias: {"total_sangrias":"0.00"}
+[2025-06-12 20:00:56] Valor esperado: 0, Diferença: 0
+[2025-06-12 20:00:56] Valor total: 0, Valor final: 0
+[2025-06-12 20:00:56] Erro ao fechar o caixa: Unknown column 'valor_total' in 'SET'
+[2025-06-12 20:01:36] Dados recebidos: caixa_id=20, valor_dinheiro=1, valor_pix=0.00, valor_cartao=0.00
+[2025-06-12 20:01:36] Caixa encontrado: {"id":20,"usuario_id":13,"caixa_numero":12,"data_abertura":"2025-06-12 14:54:21","data_fechamento":null,"valor_inicial":"0.00","valor_final":null,"valor_sangrias":"0.00","valor_vendas":"0.00","valor_vendas_dinheiro":"0.00","valor_vendas_pix":"0.00","valor_vendas_cartao":"0.00","status":"aberto","observacoes":"","valor_dinheiro":null,"valor_pix":null,"valor_cartao":null,"diferenca":null,"observacoes_fechamento":null}
+[2025-06-12 20:01:37] Totais calculados: {"total_dinheiro":"0.00","total_pix":"0.00","total_cartao":"0.00","total_geral":"0.00"}
+[2025-06-12 20:01:37] Total sangrias: {"total_sangrias":"0.00"}
+[2025-06-12 20:01:37] Valor esperado: 0, Diferença: 1
+[2025-06-12 20:01:37] Valor total: 1, Valor final: 1
+[2025-06-12 20:01:37] Erro ao fechar o caixa: Unknown column 'valor_total' in 'SET'
+[2025-06-12 20:09:20] Dados recebidos: caixa_id=21, valor_dinheiro=0.00, valor_pix=0.00, valor_cartao=0.00
+[2025-06-12 20:09:20] Caixa encontrado: {"id":21,"usuario_id":13,"caixa_numero":12,"data_abertura":"2025-06-12 15:09:10","data_fechamento":null,"valor_inicial":"0.00","valor_final":null,"valor_sangrias":"0.00","valor_vendas":"0.00","valor_vendas_dinheiro":"0.00","valor_vendas_pix":"0.00","valor_vendas_cartao":"0.00","status":"aberto","observacoes":"","valor_dinheiro":null,"valor_pix":null,"valor_cartao":null,"diferenca":null,"observacoes_fechamento":null}
+[2025-06-12 20:09:20] Totais calculados: {"total_dinheiro":"0.00","total_pix":"0.00","total_cartao":"0.00","total_geral":"0.00"}
+[2025-06-12 20:09:20] Total sangrias: {"total_sangrias":"0.00"}
+[2025-06-12 20:09:20] Valor esperado: 0, Diferença: 0
+[2025-06-12 20:09:20] Valor final: 0
+[2025-06-12 20:09:20] Caixa atualizado com sucesso. Affected rows: 1
+[2025-06-12 20:09:20] Status após atualização: {"status":"fechado"}
+[2025-06-12 20:13:30] Dados recebidos: caixa_id=22, valor_dinheiro=0.00, valor_pix=104.00, valor_cartao=0.00
+[2025-06-12 20:13:30] Caixa encontrado: {"id":22,"usuario_id":4,"caixa_numero":20,"data_abertura":"2025-06-12 15:10:58","data_fechamento":null,"valor_inicial":"0.00","valor_final":null,"valor_sangrias":"0.00","valor_vendas":"26.00","valor_vendas_dinheiro":"0.00","valor_vendas_pix":"0.00","valor_vendas_cartao":"0.00","status":"aberto","observacoes":"","valor_dinheiro":null,"valor_pix":null,"valor_cartao":null,"diferenca":null,"observacoes_fechamento":null}
+[2025-06-12 20:13:30] Totais calculados: {"total_dinheiro":"0.00","total_pix":"26.00","total_cartao":"0.00","total_geral":"26.00"}
+[2025-06-12 20:13:30] Total sangrias: {"total_sangrias":"0.00"}
+[2025-06-12 20:13:30] Valor esperado: 0, Diferença: 0
+[2025-06-12 20:13:30] Valor final: 104
+[2025-06-12 20:13:30] Caixa atualizado com sucesso. Affected rows: 1
+[2025-06-12 20:13:30] Status após atualização: {"status":"fechado"}

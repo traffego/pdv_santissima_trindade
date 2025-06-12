@@ -15,8 +15,13 @@ CREATE TABLE IF NOT EXISTS `controle_caixa` (
   `valor_vendas_dinheiro` decimal(10,2) DEFAULT 0.00,
   `valor_vendas_pix` decimal(10,2) DEFAULT 0.00,
   `valor_vendas_cartao` decimal(10,2) DEFAULT 0.00,
+  `valor_dinheiro` decimal(10,2) DEFAULT NULL,
+  `valor_pix` decimal(10,2) DEFAULT NULL,
+  `valor_cartao` decimal(10,2) DEFAULT NULL,
+  `diferenca` decimal(10,2) DEFAULT NULL,
   `status` enum('aberto','fechado') NOT NULL DEFAULT 'aberto',
   `observacoes` text DEFAULT NULL,
+  `observacoes_fechamento` text DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `usuario_id` (`usuario_id`),
   CONSTRAINT `fk_controle_caixa_usuarios` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`)
