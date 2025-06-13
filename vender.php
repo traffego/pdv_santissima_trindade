@@ -451,7 +451,8 @@ unset($_SESSION['custom_body_class']);
                         function updateCartItemDisplay(id) {
                             const item = cartItems[id];
                             const cartItemEl = document.querySelector(`.cart-item[data-id="${id}"]`);
-                            const selectedTipo = document.getElementById('tipo_venda').value;
+                            const tipoVendaEl = document.getElementById('tipo_venda');
+                            const selectedTipo = tipoVendaEl ? tipoVendaEl.value : 'comum';
                             
                             cartItemEl.querySelector('.item-quantity').value = item.quantidade;
                             const precoTotal = item.preco * item.quantidade;
@@ -463,7 +464,11 @@ unset($_SESSION['custom_body_class']);
                             }
                             
                             // Atualizar o total do carrinho sempre que um item for atualizado
-                            updateCartTotalWithTipo();
+                            if (tipoVendaEl) {
+                                updateCartTotalWithTipo();
+                            } else {
+                                updateCartTotal();
+                            }
                         }
 
                         // Nova função para atualizar o total considerando o tipo de venda
@@ -939,7 +944,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Increase quantity
         newItem.querySelector('.increase-quantity').addEventListener('click', function() {
-            const estoque = parseInt(document.querySelector(`.add-product[data-id="${id}"]`).dataset.estoque);
+            const productCard = document.querySelector(`.product-card[data-id="${id}"]`);
+            const estoque = parseInt(productCard.dataset.estoque);
             if (item.quantidade < estoque) {
                 item.quantidade++;
                 updateCartItemDisplay(id);
@@ -1011,7 +1017,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateCartItemDisplay(id) {
         const item = cartItems[id];
         const cartItemEl = document.querySelector(`.cart-item[data-id="${id}"]`);
-        const selectedTipo = document.getElementById('tipo_venda').value;
+        const tipoVendaEl = document.getElementById('tipo_venda');
+        const selectedTipo = tipoVendaEl ? tipoVendaEl.value : 'comum';
         
         cartItemEl.querySelector('.item-quantity').value = item.quantidade;
         const precoTotal = item.preco * item.quantidade;
@@ -1023,7 +1030,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Atualizar o total do carrinho sempre que um item for atualizado
-        updateCartTotalWithTipo();
+        if (tipoVendaEl) {
+            updateCartTotalWithTipo();
+        } else {
+            updateCartTotal();
+        }
     }
     
     // Update cart total and toggle visibility
