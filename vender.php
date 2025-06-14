@@ -348,6 +348,72 @@ unset($_SESSION['custom_body_class']);
                         let originalTotal = 0;
                         let originalItemPrices = {};
 
+                        // Nova função para atualizar o total considerando o tipo de venda
+                        function updateCartTotalWithTipo() {
+                            let total = 0;
+                            let totalItems = 0;
+                            const tipoVendaEl = document.getElementById('tipo_venda');
+                            const selectedTipo = tipoVendaEl ? tipoVendaEl.value : 'comum';
+                            
+                            for (const id in cartItems) {
+                                const item = cartItems[id];
+                                let itemTotal = item.preco * item.quantidade;
+                                if (selectedTipo === 'devolucao') {
+                                    itemTotal = -itemTotal;
+                                }
+                                total += itemTotal;
+                                totalItems += item.quantidade;
+                            }
+                            
+                            // Atualizar contador de itens no botão de ver todos
+                            const totalItemsCount = document.querySelector('.total-items-count');
+                            if (totalItemsCount) {
+                                totalItemsCount.textContent = totalItems;
+                            }
+                            
+                            cartTotal.textContent = `R$ ${formatPrice(total)}`;
+                            valorTotalInput.value = Math.abs(total).toFixed(2);
+                            
+                            // Adicionar classe de animação no mobile
+                            if (window.innerWidth < 992) {
+                                cartTotal.classList.add('total-bounce');
+                                setTimeout(() => {
+                                    cartTotal.classList.remove('total-bounce');
+                                }, 300);
+                            }
+                            
+                            // Se o carrinho estiver vazio, garanta que o valor seja 0
+                            if (Object.keys(cartItems).length === 0) {
+                                emptyCartMessage.style.display = 'block';
+                                valorTotalInput.value = '0';
+                                cartToggle.style.display = 'none';
+                            }
+                            
+                            // Show/hide toggle button based on number of items
+                            const totalProducts = Object.keys(cartItems).length;
+                            cartToggle.style.display = totalProducts > 2 ? 'block' : 'none';
+                        }
+
+                        // Update cart item display
+                        function updateCartItemDisplay(id) {
+                            const item = cartItems[id];
+                            const cartItemEl = document.querySelector(`.cart-item[data-id="${id}"]`);
+                            const tipoVendaEl = document.getElementById('tipo_venda');
+                            const selectedTipo = tipoVendaEl ? tipoVendaEl.value : 'comum';
+                            
+                            cartItemEl.querySelector('.item-quantity').value = item.quantidade;
+                            const precoTotal = item.preco * item.quantidade;
+                            
+                            if (selectedTipo === 'devolucao') {
+                                cartItemEl.querySelector('.item-price').textContent = `R$ ${formatPrice(-precoTotal)}`;
+                            } else {
+                                cartItemEl.querySelector('.item-price').textContent = `R$ ${formatPrice(precoTotal)}`;
+                            }
+                            
+                            // Atualizar o total do carrinho sempre que um item for atualizado
+                            updateCartTotal();
+                        }
+
                         tipoBtns.forEach(btn => {
                             btn.addEventListener('click', function() {
                                 tipoBtns.forEach(b => b.classList.remove('active'));
@@ -366,69 +432,18 @@ unset($_SESSION['custom_body_class']);
                                         '<i class="fas fa-times-circle me-1"></i>PERDA';
                                     doacaoLabel.className = 'ms-2 badge ' + 
                                         (selectedTipo === 'doacao' ? 'bg-success' : 'bg-danger');
-
-                                    // Restaurar preços originais dos itens
-                                    document.querySelectorAll('.cart-item').forEach(item => {
-                                        const itemId = item.dataset.id;
-                                        if (originalItemPrices[itemId]) {
-                                            const itemPrice = item.querySelector('.item-price');
-                                            const quantidade = parseInt(item.querySelector('.item-quantity').value);
-                                            const precoUnitario = originalItemPrices[itemId];
-                                            itemPrice.textContent = `R$ ${formatPrice(precoUnitario * quantidade)}`;
-                                        }
-                                    });
-                                } else if (selectedTipo === 'devolucao') {
-                                    // Para devolução, salvar os preços originais e mostrar negativos
-                                    document.querySelectorAll('.cart-item').forEach(item => {
-                                        const itemId = item.dataset.id;
-                                        const itemPrice = item.querySelector('.item-price');
-                                        const quantidade = parseInt(item.querySelector('.item-quantity').value);
-                                        const precoUnitario = parseFloat(itemPrice.textContent.replace('R$ ', '').replace(',', '.')) / quantidade;
-                                        
-                                        // Salvar preço original se ainda não foi salvo
-                                        if (!originalItemPrices[itemId]) {
-                                            originalItemPrices[itemId] = precoUnitario;
-                                        }
-                                        
-                                        // Mostrar preço negativo
-                                        itemPrice.textContent = `R$ ${formatPrice(-precoUnitario * quantidade)}`;
-                                    });
-
-                                    // Atualizar total
-                                    let total = 0;
-                                    document.querySelectorAll('.cart-item').forEach(item => {
-                                        const itemPrice = item.querySelector('.item-price');
-                                        total += parseFloat(itemPrice.textContent.replace('R$ ', '').replace(',', '.'));
-                                    });
-
-                                    cartTotal.textContent = `R$ ${formatPrice(total)}`;
-                                    valorTotalInput.value = total.toFixed(2);
-                                    doacaoLabel.style.display = 'inline-flex';
-                                    doacaoLabel.innerHTML = '<i class="fas fa-undo me-1"></i>DEVOLUÇÃO';
-                                    doacaoLabel.className = 'ms-2 badge bg-warning';
                                 } else {
-                                    // Se não for nenhum dos tipos especiais e tiver um valor original salvo, restaurar
-                                    if (originalTotal > 0) {
-                                        cartTotal.textContent = `R$ ${formatPrice(originalTotal)}`;
-                                        valorTotalInput.value = originalTotal.toFixed(2);
+                                    // Se não for doação ou perda, atualizar o total normalmente
+                                    updateCartTotal();
+                                    
+                                    if (selectedTipo === 'devolucao') {
+                                        doacaoLabel.style.display = 'inline-flex';
+                                        doacaoLabel.innerHTML = '<i class="fas fa-undo me-1"></i>DEVOLUÇÃO';
+                                        doacaoLabel.className = 'ms-2 badge bg-warning';
+                                    } else {
+                                        doacaoLabel.style.display = 'none';
                                     }
-
-                                    // Restaurar preços originais dos itens
-                                    document.querySelectorAll('.cart-item').forEach(item => {
-                                        const itemId = item.dataset.id;
-                                        if (originalItemPrices[itemId]) {
-                                            const itemPrice = item.querySelector('.item-price');
-                                            const quantidade = parseInt(item.querySelector('.item-quantity').value);
-                                            const precoUnitario = originalItemPrices[itemId];
-                                            itemPrice.textContent = `R$ ${formatPrice(precoUnitario * quantidade)}`;
-                                        }
-                                    });
-
-                                    doacaoLabel.style.display = 'none';
                                 }
-
-                                // Após trocar o tipo, atualizar todos os itens do carrinho
-                                Object.keys(cartItems).forEach(id => updateCartItemDisplay(id));
                             });
                         });
 
@@ -446,46 +461,6 @@ unset($_SESSION['custom_body_class']);
                                 }
                             }
                         });
-
-                        // Atualizar a função updateCartItemDisplay para considerar o tipo de venda
-                        function updateCartItemDisplay(id) {
-                            const item = cartItems[id];
-                            const cartItemEl = document.querySelector(`.cart-item[data-id="${id}"]`);
-                            const tipoVendaEl = document.getElementById('tipo_venda');
-                            const selectedTipo = tipoVendaEl ? tipoVendaEl.value : 'comum';
-                            
-                            cartItemEl.querySelector('.item-quantity').value = item.quantidade;
-                            const precoTotal = item.preco * item.quantidade;
-                            
-                            if (selectedTipo === 'devolucao') {
-                                cartItemEl.querySelector('.item-price').textContent = `R$ ${formatPrice(-precoTotal)}`;
-                            } else {
-                                cartItemEl.querySelector('.item-price').textContent = `R$ ${formatPrice(precoTotal)}`;
-                            }
-                            
-                            // Atualizar o total do carrinho sempre que um item for atualizado
-                            if (tipoVendaEl) {
-                                updateCartTotalWithTipo();
-                            } else {
-                                updateCartTotal();
-                            }
-                        }
-
-                        // Nova função para atualizar o total considerando o tipo de venda
-                        function updateCartTotalWithTipo() {
-                            const selectedTipo = document.getElementById('tipo_venda').value;
-                            let total = 0;
-                            for (const id in cartItems) {
-                                const item = cartItems[id];
-                                let preco = item.preco * item.quantidade;
-                                if (selectedTipo === 'devolucao') {
-                                    preco = -preco;
-                                }
-                                total += preco;
-                            }
-                            document.getElementById('cart-total').textContent = `R$ ${formatPrice(total)}`;
-                            document.getElementById('valor_total_input').value = total.toFixed(2);
-                        }
                     });
                     </script>
                     <?php endif; ?>
@@ -616,6 +591,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const cartCounter = document.querySelector('.cart-counter');
     const cartToggle = document.getElementById('cart-toggle');
     let isCartExpanded = false;
+    let originalTotal = 0;
+    let originalItemPrices = {};
     
     // Inicializar o Toast de erro
     const errorToastEl = document.getElementById('errorToast');
@@ -1030,21 +1007,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Atualizar o total do carrinho sempre que um item for atualizado
-        if (tipoVendaEl) {
-            updateCartTotalWithTipo();
-        } else {
-            updateCartTotal();
-        }
+        updateCartTotal();
     }
     
     // Update cart total and toggle visibility
     function updateCartTotal() {
         let total = 0;
         let totalItems = 0;
+        const tipoVendaEl = document.getElementById('tipo_venda');
+        const selectedTipo = tipoVendaEl ? tipoVendaEl.value : 'comum';
         
         for (const id in cartItems) {
             const item = cartItems[id];
-            total += item.preco * item.quantidade;
+            let itemTotal = item.preco * item.quantidade;
+            if (selectedTipo === 'devolucao') {
+                itemTotal = -itemTotal;
+            }
+            total += itemTotal;
             totalItems += item.quantidade;
         }
         
@@ -1055,7 +1034,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         cartTotal.textContent = `R$ ${formatPrice(total)}`;
-        valorTotalInput.value = total.toFixed(2);
+        valorTotalInput.value = Math.abs(total).toFixed(2);
         
         // Adicionar classe de animação no mobile
         if (window.innerWidth < 992) {
