@@ -43,6 +43,8 @@ date_default_timezone_set('America/Sao_Paulo'); ?>
             width: 16.66%;
             z-index: 1030;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
         
         .sidebar a {
@@ -442,6 +444,31 @@ date_default_timezone_set('America/Sao_Paulo'); ?>
                 font-size: 0.7rem;
             }
         }
+
+        /* Logout button styles */
+        .sidebar .btn-danger {
+            margin: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 12px 15px;
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+        }
+        
+        .sidebar .btn-danger:active {
+            transform: translateY(0);
+        }
+        
+        @media (max-width: 991px) {
+            .sidebar .btn-danger {
+                margin: 15px 10px;
+            }
+        }
     </style>
 </head>
 <body class="<?php echo isset($_SESSION['custom_body_class']) ? $_SESSION['custom_body_class'] : ''; ?>">
@@ -512,8 +539,8 @@ date_default_timezone_set('America/Sao_Paulo'); ?>
                     <a href="usuarios.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'usuarios.php' || basename($_SERVER['PHP_SELF']) == 'adicionar_usuario.php' || basename($_SERVER['PHP_SELF']) == 'editar_usuario.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-users"></i> Usuários
                     </a>
-                    <a href="limpar_sistema.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'limpar_sistema.php' ? 'active' : ''; ?> menu-item text-danger">
-                        <i class="fas fa-trash-alt"></i> Limpar Sistema
+                    <a href="logout.php" class="menu-item btn btn-danger w-100 text-start mb-3">
+                        <i class="fas fa-sign-out-alt"></i> Sair do Sistema
                     </a>
                 <?php else: ?>
                     <!-- Menu de Operador de Caixa -->
@@ -542,11 +569,10 @@ date_default_timezone_set('America/Sao_Paulo'); ?>
                     <a href="usuarios.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'usuarios.php' || basename($_SERVER['PHP_SELF']) == 'adicionar_usuario.php' || basename($_SERVER['PHP_SELF']) == 'editar_usuario.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-users"></i> Usuários
                     </a>
+                    <a href="logout.php" class="menu-item btn btn-danger w-100 text-start mb-3">
+                        <i class="fas fa-sign-out-alt"></i> Sair do Sistema
+                    </a>
                 <?php endif; ?>
-                
-                <a href="logout.php" class="mt-auto logout-btn menu-item">
-                    <i class="fas fa-sign-out-alt"></i> Sair
-                </a>
             </div>
             <div class="col-md-10 content">
                 <div class="d-none d-md-flex justify-content-between align-items-center mb-4">
