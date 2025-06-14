@@ -305,8 +305,11 @@ include 'header.php';
         <!-- Produtos Mais Vendidos -->
         <div class="col-md-6">
             <div class="card">
-                <div class="card-header py-2">
+                <div class="card-header py-2 d-flex justify-content-between align-items-center">
                     <h6 class="card-title mb-0">Produtos Mais Vendidos</h6>
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#todosProdutosModal">
+                        <i class="fas fa-list me-1"></i>Ver Todos
+                    </button>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive" style="height: 250px;">
@@ -448,6 +451,55 @@ include 'header.php';
             </div>
         </div>
     </div>
+
+    <!-- Modal de Todos os Produtos -->
+    <div class="modal fade" id="todosProdutosModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-box me-2"></i>Todos os Produtos Vendidos
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="text-muted">
+                            Total de Itens Vendidos: <strong><?php echo $total_itens; ?></strong>
+                        </div>
+                        <button type="button" class="btn btn-success" id="exportarExcel">
+                            <i class="fas fa-file-excel me-2"></i>Exportar Excel
+                        </button>
+                    </div>
+                    <div class="table-responsive" style="max-height: 400px;">
+                        <table class="table table-striped table-hover" id="tabelaProdutos">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>Produto</th>
+                                    <th class="text-end">Quantidade</th>
+                                    <th class="text-end">% do Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($produtos_mais_vendidos as $produto => $quantidade): ?>
+                                <tr>
+                                    <td><?php echo $produto; ?></td>
+                                    <td class="text-end"><?php echo $quantidade; ?></td>
+                                    <td class="text-end">
+                                        <?php echo number_format(($quantidade / $total_itens) * 100, 1); ?>%
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
@@ -470,6 +522,7 @@ include 'header.php';
 }
 </style>
 
+<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Configuração comum para todos os gráficos
@@ -557,6 +610,38 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         }
+    });
+
+    // Função para exportar para Excel
+    document.getElementById('exportarExcel').addEventListener('click', function() {
+        // Criar uma cópia da tabela sem a coluna de ações
+        const table = document.getElementById('tabelaProdutos');
+        const data = [];
+        
+        // Adicionar cabeçalho
+        const headers = [];
+        table.querySelectorAll('thead th').forEach(th => {
+            headers.push(th.textContent.trim());
+        });
+        data.push(headers);
+        
+        // Adicionar dados
+        table.querySelectorAll('tbody tr').forEach(tr => {
+            const row = [];
+            tr.querySelectorAll('td').forEach(td => {
+                row.push(td.textContent.trim());
+            });
+            data.push(row);
+        });
+        
+        // Criar planilha
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Produtos Vendidos");
+        
+        // Gerar arquivo
+        const dataAtual = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+        XLSX.writeFile(wb, `produtos_vendidos_${dataAtual}.xlsx`);
     });
 });
 
