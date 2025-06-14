@@ -10,15 +10,23 @@ $data_inicio = isset($_GET['data_inicio']) ? $_GET['data_inicio'] : date('Y-m-d'
 $data_fim = isset($_GET['data_fim']) ? $_GET['data_fim'] : date('Y-m-d');
 $caixa_filtro = isset($_GET['caixa']) ? $_GET['caixa'] : '';
 $forma_pagamento = isset($_GET['forma_pagamento']) ? $_GET['forma_pagamento'] : '';
+$produto_filtro = isset($_GET['produto']) ? $_GET['produto'] : '';
 
 include 'header.php';
 
 // Construir a consulta SQL base
-$sql_base = "SELECT v.*, DATE_FORMAT(v.data_hora, '%d/%m/%Y %H:%i') as data_formatada, 
+$sql_base = "SELECT DISTINCT v.*, DATE_FORMAT(v.data_hora, '%d/%m/%Y %H:%i') as data_formatada, 
              u.nome as nome_usuario 
              FROM vendas v 
-             LEFT JOIN usuarios u ON v.usuario_id = u.id 
-             WHERE DATE(v.data_hora) BETWEEN ? AND ?";
+             LEFT JOIN usuarios u ON v.usuario_id = u.id";
+
+// Adicionar JOIN com itens_venda e produtos se houver filtro de produto
+if (!empty($produto_filtro)) {
+    $sql_base .= " LEFT JOIN itens_venda iv ON v.id = iv.venda_id 
+                   LEFT JOIN produtos p ON iv.produto_id = p.id";
+}
+
+$sql_base .= " WHERE DATE(v.data_hora) BETWEEN ? AND ?";
 
 $params = array($data_inicio, $data_fim);
 $types = "ss";
@@ -35,6 +43,13 @@ if (!empty($forma_pagamento)) {
     $sql_base .= " AND v.forma_pagamento = ?";
     $params[] = $forma_pagamento;
     $types .= "s";
+}
+
+// Filtrar por produto
+if (!empty($produto_filtro)) {
+    $sql_base .= " AND p.id = ?";
+    $params[] = $produto_filtro;
+    $types .= "i";
 }
 
 // Restringir por permissão: Caixas só veem suas próprias vendas
@@ -75,6 +90,14 @@ if ($_SESSION['nivel'] === 'administrador') {
     while ($row = mysqli_fetch_assoc($result_caixas)) {
         $caixas[] = $row['caixa'];
     }
+}
+
+// Buscar lista de produtos para o filtro
+$sql_produtos = "SELECT id, nome FROM produtos WHERE quantidade_estoque > 0 ORDER BY nome";
+$result_produtos = mysqli_query($conn, $sql_produtos);
+$produtos = array();
+while ($row = mysqli_fetch_assoc($result_produtos)) {
+    $produtos[$row['id']] = $row['nome'];
 }
 ?>
 
@@ -125,6 +148,18 @@ if ($_SESSION['nivel'] === 'administrador') {
                                 <option value="Dinheiro" <?php echo ($forma_pagamento == 'Dinheiro') ? 'selected' : ''; ?>>Dinheiro</option>
                                 <option value="Pix" <?php echo ($forma_pagamento == 'Pix') ? 'selected' : ''; ?>>Pix</option>
                                 <option value="Cartão" <?php echo ($forma_pagamento == 'Cartão') ? 'selected' : ''; ?>>Cartão</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Produto</label>
+                            <select class="form-select" name="produto">
+                                <option value="">Todos</option>
+                                <?php foreach ($produtos as $id => $nome): ?>
+                                    <option value="<?php echo $id; ?>" <?php echo ($produto_filtro == $id ? 'selected' : ''); ?>>
+                                        <?php echo $nome; ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                         

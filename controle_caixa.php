@@ -39,15 +39,12 @@ if (!$caixa_atual) {
 
 // Construir a consulta SQL base
 $sql_base = "SELECT 
-    v.*, 
-    DATE_FORMAT(v.data_hora, '%d/%m/%Y %H:%i') as data_formatada,
-    DATE(v.data_hora) as data_venda,
-    p.nome as produto_nome,
-    iv.quantidade,
-    iv.preco_unitario
+    v.id,
+    v.data_hora,
+    v.valor_total,
+    v.forma_pagamento,
+    DATE(v.data_hora) as data_venda
 FROM vendas v 
-LEFT JOIN itens_venda iv ON v.id = iv.venda_id
-LEFT JOIN produtos p ON iv.produto_id = p.id
 WHERE DATE(v.data_hora) BETWEEN ? AND ?";
 
 // Se não for administrador, filtrar apenas pelo usuário atual
@@ -76,30 +73,19 @@ $result = mysqli_stmt_get_result($stmt);
 // Inicializar totalizadores
 $total_vendas = 0;
 $total_valor = 0;
-$total_itens = 0;
 $vendas_por_pagamento = array(
     'Dinheiro' => 0,
     'Pix' => 0,
     'Cartão' => 0
 );
-$produtos_mais_vendidos = array();
 $vendas_por_dia = array();
 $vendas_por_hora = array_fill(0, 24, 0);
 
-// Processar resultados
+// Processar resultados das vendas
 while ($row = mysqli_fetch_assoc($result)) {
     $total_vendas++;
     $total_valor += $row['valor_total'];
-    $total_itens += $row['quantidade'];
     $vendas_por_pagamento[$row['forma_pagamento']] += $row['valor_total'];
-    
-    // Contabilizar produtos mais vendidos
-    if (!empty($row['produto_nome'])) {
-        if (!isset($produtos_mais_vendidos[$row['produto_nome']])) {
-            $produtos_mais_vendidos[$row['produto_nome']] = 0;
-        }
-        $produtos_mais_vendidos[$row['produto_nome']] += $row['quantidade'];
-    }
     
     // Contabilizar vendas por dia
     $data_venda = $row['data_venda'];
@@ -111,6 +97,40 @@ while ($row = mysqli_fetch_assoc($result)) {
     // Contabilizar vendas por hora
     $hora = date('G', strtotime($row['data_hora']));
     $vendas_por_hora[$hora] += $row['valor_total'];
+}
+
+// Buscar total de itens e produtos mais vendidos em uma consulta separada
+$sql_itens = "SELECT 
+    p.nome as produto_nome,
+    SUM(iv.quantidade) as quantidade_total
+FROM itens_venda iv
+JOIN vendas v ON iv.venda_id = v.id
+JOIN produtos p ON iv.produto_id = p.id
+WHERE DATE(v.data_hora) BETWEEN ? AND ?";
+
+$params_itens = array($data_inicio, $data_fim);
+$types_itens = "ss";
+
+if ($_SESSION['nivel'] !== 'administrador') {
+    $sql_itens .= " AND v.usuario_id = ? AND v.caixa = ?";
+    $params_itens[] = $usuario_id;
+    $params_itens[] = $caixa_numero;
+    $types_itens .= "ii";
+}
+
+$sql_itens .= " GROUP BY p.nome ORDER BY quantidade_total DESC";
+
+$stmt_itens = mysqli_prepare($conn, $sql_itens);
+mysqli_stmt_bind_param($stmt_itens, $types_itens, ...$params_itens);
+mysqli_stmt_execute($stmt_itens);
+$result_itens = mysqli_stmt_get_result($stmt_itens);
+
+$total_itens = 0;
+$produtos_mais_vendidos = array();
+
+while ($row = mysqli_fetch_assoc($result_itens)) {
+    $total_itens += $row['quantidade_total'];
+    $produtos_mais_vendidos[$row['produto_nome']] = $row['quantidade_total'];
 }
 
 // Ordenar produtos mais vendidos e vendas por dia
