@@ -1,4 +1,9 @@
-<?php require_once 'check_login.php'; ?>
+<?php require_once 'check_login.php'; 
+$base_path = '';
+if (strpos($_SERVER['SCRIPT_NAME'], '/produtos/') !== false) {
+    $base_path = '../';
+}
+?>
 
 <?php 
 // Ativar exibição de erros PHP
@@ -14,21 +19,33 @@ date_default_timezone_set('America/Sao_Paulo'); ?>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema PDV</title>
     <!-- Favicon -->
-    <link rel="icon" href="logo.jpeg" type="image/jpeg">
+    <link rel="icon" href="<?php echo $base_path; ?>logo.jpeg" type="image/jpeg">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary-color: #0d6efd;
-            --secondary-color: #343a40;
-            --accent-color: #198754;
+            --primary-color: #3b82f6; /* Modern Indigo/Blue */
+            --primary-hover: #2563eb;
+            --secondary-color: #0f172a; /* Sleek Slate Dark */
+            --accent-color: #10b981; /* Emerald */
+            --bg-sidebar: #0f172a;
+            --bg-sidebar-hover: #1e293b;
+            --text-sidebar: #94a3b8;
+            --text-sidebar-active: #ffffff;
+            --sidebar-width: 260px;
         }
 
         body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
             touch-action: manipulation;
             -webkit-overflow-scrolling: touch;
         }
@@ -36,45 +53,50 @@ date_default_timezone_set('America/Sao_Paulo'); ?>
         /* Sidebar styles */
         .sidebar {
             min-height: 100vh;
-            background-color: var(--secondary-color);
+            background-color: var(--bg-sidebar);
             padding-top: 20px;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: fixed;
-            width: 16.66%;
+            width: var(--sidebar-width);
             z-index: 1030;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
         }
         
         .sidebar a {
-            color: #f8f9fa;
-            padding: 10px 15px;
-            display: block;
+            color: var(--text-sidebar);
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
             text-decoration: none;
-            border-radius: 5px;
-            margin: 2px 5px;
-            transition: all 0.2s;
+            border-radius: 8px;
+            margin: 4px 12px;
+            font-weight: 500;
+            font-size: 0.92rem;
+            transition: all 0.2s ease;
         }
         
         /* Submenu styles */
         .submenu {
-            margin-left: 10px;
-            border-left: 1px solid rgba(255,255,255,0.1);
+            margin-left: 20px;
+            border-left: 1px solid rgba(255,255,255,0.05);
+            padding-left: 5px;
         }
         
         .submenu a {
-            font-size: 0.9em;
-            padding: 8px 15px;
-            opacity: 0.9;
+            font-size: 0.85rem;
+            padding: 8px 16px;
+            margin: 2px 12px;
         }
         
         .submenu a:hover {
-            opacity: 1;
+            color: var(--text-sidebar-active);
         }
         
         .menu-group {
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
         
         .menu-group > a.active + .submenu {
@@ -82,46 +104,51 @@ date_default_timezone_set('America/Sao_Paulo'); ?>
         }
         
         .sidebar a:hover {
-            background-color: #495057;
-            transform: translateX(3px);
+            background-color: var(--bg-sidebar-hover);
+            color: var(--text-sidebar-active);
+            transform: translateX(4px);
         }
         
         .sidebar .active {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+            color: var(--text-sidebar-active);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
             position: relative;
         }
         
-        .sidebar .active::before {
-            content: '';
-            position: absolute;
-            left: -5px;
-            top: 0;
-            height: 100%;
-            width: 5px;
-            background-color: #ffffff;
-            border-radius: 0 3px 3px 0;
-        }
-        
         .sidebar i {
-            margin-right: 10px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+
+        .sidebar a:hover i {
+            transform: scale(1.1);
         }
         
         .content {
-            padding: 20px;
-            margin-left: 16.66%;
-            transition: all 0.3s ease;
+            padding: 30px;
+            margin-left: var(--sidebar-width);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .card {
-            margin-bottom: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+            border-radius: 12px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.03);
             overflow: hidden;
+            background: #ffffff;
         }
         
         .card-header {
-            background-color: rgba(0,0,0,0.03);
-            font-weight: 500;
+            background-color: #ffffff;
+            border-bottom: 1px solid #f1f5f9;
+            padding: 16px 20px;
+            font-weight: 600;
+            color: #1e293b;
         }
         
         .gauge-container {
@@ -132,81 +159,76 @@ date_default_timezone_set('America/Sao_Paulo'); ?>
         }
         
         .user-info {
-            color: #f8f9fa;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: #ffffff;
+            padding: 20px 15px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
             text-align: center;
         }
         
         .user-info img {
-            width: 64px;
-            height: 64px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
-            margin-bottom: 10px;
-            border: 2px solid rgba(255,255,255,0.3);
+            margin-bottom: 12px;
+            border: 2px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
         
         .user-info h5 {
-            margin-bottom: 5px;
-            font-size: 1rem;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: #ffffff;
+            letter-spacing: 0.3px;
         }
         
         .user-info .badge {
-            font-size: 0.8rem;
-            padding: 5px 10px;
+            font-size: 0.78rem;
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-weight: 600;
         }
         
         .logout-btn {
             margin-top: auto;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid rgba(255,255,255,0.05);
         }
         
         /* Mobile styles */
-        #mobile-menu-toggle {
+        .mobile-header {
             display: none;
             position: fixed;
-            top: 10px;
-            left: 10px;
-            z-index: 1040;
-            background-color: var(--primary-color);
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: var(--bg-sidebar);
             color: white;
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1020;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 991px) {
-            .sidebar {
-                width: 250px;
-                left: -250px;
-            }
-            
-            .sidebar.active {
-                left: 0;
-            }
-            
-            .content {
-                margin-left: 0;
-                padding-top: 60px;
-            }
-            
-            #mobile-menu-toggle {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .page-title-mobile {
-                text-align: center;
-                margin-bottom: 15px;
-            }
+        #mobile-menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s;
         }
-        
+
+        #mobile-menu-toggle:active {
+            opacity: 0.7;
+        }
+
         /* Overlay for mobile menu */
         .menu-overlay {
             display: none;
@@ -215,8 +237,39 @@ date_default_timezone_set('America/Sao_Paulo'); ?>
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             z-index: 1025;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 991px) {
+            .sidebar {
+                width: 280px;
+                left: -280px;
+                box-shadow: none;
+            }
+            
+            .sidebar.active {
+                left: 0;
+                box-shadow: 10px 0 30px rgba(0, 0, 0, 0.25);
+            }
+            
+            .content {
+                margin-left: 0;
+                padding: 20px;
+                padding-top: 80px;
+            }
+            
+            .mobile-header {
+                display: flex;
+            }
+            
+            .page-title-mobile {
+                text-align: center;
+                margin-bottom: 20px;
+            }
         }
 
         /* Venda page styles */
@@ -472,109 +525,112 @@ date_default_timezone_set('America/Sao_Paulo'); ?>
     </style>
 </head>
 <body class="<?php echo isset($_SESSION['custom_body_class']) ? $_SESSION['custom_body_class'] : ''; ?>">
-    <!-- Mobile menu toggle button -->
-    <button id="mobile-menu-toggle" type="button" aria-label="Toggle menu">
-        <i class="fas fa-bars"></i>
-    </button>
+    <!-- Mobile top bar -->
+    <div class="mobile-header">
+        <button id="mobile-menu-toggle" type="button" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <span class="fw-bold" style="font-size: 1.15rem; letter-spacing: 0.5px;">Sistema PDV</span>
+        <div style="width: 34px;"></div>
+    </div>
     
     <!-- Overlay for mobile menu -->
     <div class="menu-overlay"></div>
     
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-2 sidebar d-flex flex-column">
+    <div class="container-fluid p-0">
+        <div class="d-flex">
+            <div class="sidebar d-flex flex-column">
                 <div class="user-info">
-                    <img src="logo.jpeg" alt="Logo" class="img-fluid" style="width: 64px; height: 64px; object-fit: cover;">
+                    <img src="<?php echo $base_path; ?>logo.jpeg" alt="Logo" class="img-fluid" style="width: 64px; height: 64px; object-fit: cover;">
                     <h5><?php echo $_SESSION['usuario_nome']; ?></h5>
-                    <?php if ($_SESSION['nivel'] === 'administrador'): ?>
-                        <span class="badge bg-danger">Administrador</span>
-                    <?php else: ?>
-                        <span class="badge bg-success">Caixa <?php echo $_SESSION['caixa_numero']; ?></span>
-                    <?php endif; ?>
+                    <div class="d-flex align-items-center justify-content-center gap-2 mt-2">
+                        <?php if ($_SESSION['nivel'] === 'administrador'): ?>
+                            <span class="badge bg-danger">Administrador</span>
+                        <?php else: ?>
+                            <span class="badge bg-success">Caixa <?php echo $_SESSION['caixa_numero']; ?></span>
+                        <?php endif; ?>
+                        <a href="<?php echo $base_path; ?>logout.php" class="btn btn-sm btn-outline-danger border-0 p-1" title="Sair do Sistema" style="line-height: 1; display: inline-flex; align-items: center; justify-content: center; min-height: auto; width: auto; margin: 0; background: none;">
+                            <i class="fas fa-sign-out-alt" style="margin: 0 !important; font-size: 1.05rem; color: #ef4444;"></i>
+                        </a>
+                    </div>
                 </div>
                 
                 <?php if ($_SESSION['nivel'] === 'administrador'): ?>
                     <!-- Menu de Administrador -->
-                    <a href="index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?> menu-item">
+                    <a href="<?php echo $base_path; ?>index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-tachometer-alt"></i> Dashboard
                     </a>
                     
                     <!-- Menu Produtos com Submenu -->
                     <div class="menu-group">
-                        <a href="produtos.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['produtos.php', 'adicionar_produto.php', 'editar_produto.php', 'categorias.php', 'editar_categoria.php']) ? 'active' : ''; ?> menu-item">
+                        <a href="<?php echo $base_path; ?>produtos.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['produtos.php', 'adicionar_produto.php', 'editar_produto.php', 'categorias.php', 'editar_categoria.php']) ? 'active' : ''; ?> menu-item">
                             <i class="fas fa-box"></i> Produtos
                         </a>
                         <div class="submenu" style="padding-left: 20px;">
-                            <a href="produtos/categorias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'categorias.php' ? 'active' : ''; ?> menu-item">
+                            <a href="<?php echo $base_path; ?>produtos/categorias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'categorias.php' ? 'active' : ''; ?> menu-item">
                                 <i class="fas fa-tags"></i> Categorias
                             </a>
-                            <a href="produtos/gerenciar_permissoes.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'gerenciar_permissoes.php' ? 'active' : ''; ?> menu-item">
+                            <a href="<?php echo $base_path; ?>produtos/gerenciar_permissoes.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'gerenciar_permissoes.php' ? 'active' : ''; ?> menu-item">
                                 <i class="fas fa-key"></i> Permissões
                             </a>
                         </div>
                     </div>
 
-                    <a href="vender.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'vender.php' ? 'active' : ''; ?> menu-item">
+                    <a href="<?php echo $base_path; ?>vender.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'vender.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-shopping-cart"></i> Vender
                     </a>
-                    <a href="lista_vendas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'lista_vendas.php' || basename($_SERVER['PHP_SELF']) == 'detalhes_venda.php' ? 'active' : ''; ?> menu-item">
+                    <a href="<?php echo $base_path; ?>lista_vendas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'lista_vendas.php' || basename($_SERVER['PHP_SELF']) == 'detalhes_venda.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-receipt"></i> Vendas
                     </a>
                     
                     <!-- Menu de Caixa com Submenu -->
                     <div class="menu-group">
-                        <a href="controle_caixa.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['controle_caixa.php', 'gestao_caixas.php']) ? 'active' : ''; ?> menu-item">
+                        <a href="<?php echo $base_path; ?>controle_caixa.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['controle_caixa.php', 'gestao_caixas.php']) ? 'active' : ''; ?> menu-item">
                             <i class="fas fa-cash-register"></i> Caixa
                         </a>
                         <div class="submenu" style="padding-left: 20px;">
-                            <a href="gestao_caixas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'gestao_caixas.php' ? 'active' : ''; ?> menu-item">
+                            <a href="<?php echo $base_path; ?>gestao_caixas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'gestao_caixas.php' ? 'active' : ''; ?> menu-item">
                                 <i class="fas fa-history"></i> Histórico
                             </a>
-                            <a href="sangrias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sangrias.php' ? 'active' : ''; ?> menu-item">
+                            <a href="<?php echo $base_path; ?>sangrias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sangrias.php' ? 'active' : ''; ?> menu-item">
                                 <i class="fas fa-money-bill-wave"></i> Sangrias
                             </a>
                         </div>
                     </div>
 
-                    <a href="usuarios.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'usuarios.php' || basename($_SERVER['PHP_SELF']) == 'adicionar_usuario.php' || basename($_SERVER['PHP_SELF']) == 'editar_usuario.php' ? 'active' : ''; ?> menu-item">
+                    <a href="<?php echo $base_path; ?>usuarios.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'usuarios.php' || basename($_SERVER['PHP_SELF']) == 'adicionar_usuario.php' || basename($_SERVER['PHP_SELF']) == 'editar_usuario.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-users"></i> Usuários
-                    </a>
-                    <a href="logout.php" class="menu-item btn btn-danger w-100 text-start mb-3">
-                        <i class="fas fa-sign-out-alt"></i> Sair do Sistema
                     </a>
                 <?php else: ?>
                     <!-- Menu de Operador de Caixa -->
-                    <a href="vender.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'vender.php' ? 'active' : ''; ?> menu-item">
+                    <a href="<?php echo $base_path; ?>vender.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'vender.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-shopping-cart"></i> Vender
                     </a>
-                    <a href="lista_vendas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'lista_vendas.php' || basename($_SERVER['PHP_SELF']) == 'detalhes_venda.php' ? 'active' : ''; ?> menu-item">
+                    <a href="<?php echo $base_path; ?>lista_vendas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'lista_vendas.php' || basename($_SERVER['PHP_SELF']) == 'detalhes_venda.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-receipt"></i> Minhas Vendas
                     </a>
                     
                     <!-- Menu de Caixa com Submenu -->
                     <div class="menu-group">
-                        <a href="controle_caixa.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['controle_caixa.php', 'gestao_caixas.php']) ? 'active' : ''; ?> menu-item">
+                        <a href="<?php echo $base_path; ?>controle_caixa.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['controle_caixa.php', 'gestao_caixas.php']) ? 'active' : ''; ?> menu-item">
                             <i class="fas fa-cash-register"></i> Meu Caixa
                         </a>
                         <div class="submenu" style="padding-left: 20px;">
-                            <a href="gestao_caixas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'gestao_caixas.php' ? 'active' : ''; ?> menu-item">
+                            <a href="<?php echo $base_path; ?>gestao_caixas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'gestao_caixas.php' ? 'active' : ''; ?> menu-item">
                                 <i class="fas fa-history"></i> Histórico
                             </a>
-                            <a href="sangrias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sangrias.php' ? 'active' : ''; ?> menu-item">
+                            <a href="<?php echo $base_path; ?>sangrias.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sangrias.php' ? 'active' : ''; ?> menu-item">
                                 <i class="fas fa-money-bill-wave"></i> Sangrias
                             </a>
                         </div>
                     </div>
 
-                    <a href="usuarios.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'usuarios.php' || basename($_SERVER['PHP_SELF']) == 'adicionar_usuario.php' || basename($_SERVER['PHP_SELF']) == 'editar_usuario.php' ? 'active' : ''; ?> menu-item">
+                    <a href="<?php echo $base_path; ?>usuarios.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'usuarios.php' || basename($_SERVER['PHP_SELF']) == 'adicionar_usuario.php' || basename($_SERVER['PHP_SELF']) == 'editar_usuario.php' ? 'active' : ''; ?> menu-item">
                         <i class="fas fa-users"></i> Usuários
-                    </a>
-                    <a href="logout.php" class="menu-item btn btn-danger w-100 text-start mb-3">
-                        <i class="fas fa-sign-out-alt"></i> Sair do Sistema
                     </a>
                 <?php endif; ?>
             </div>
-            <div class="col-md-10 content">
+            <div class="content flex-grow-1">
                 <div class="d-none d-md-flex justify-content-between align-items-center mb-4">
                     <h2><?php echo ucfirst(str_replace(['.php', '_'], ['', ' '], basename($_SERVER['PHP_SELF']))); ?></h2>
                     <div>

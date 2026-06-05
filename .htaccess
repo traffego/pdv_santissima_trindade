@@ -1,18 +1,29 @@
 # PHP Settings
-php_value display_errors 1
-php_value display_startup_errors 1
-php_value error_reporting E_ALL
+<IfModule mod_php.c>
+    php_value display_errors 1
+    php_value display_startup_errors 1
+    php_value error_reporting E_ALL
+</IfModule>
+<IfModule mod_php7.c>
+    php_value display_errors 1
+    php_value display_startup_errors 1
+    php_value error_reporting E_ALL
+</IfModule>
 
 # Character Encoding
 AddDefaultCharset UTF-8
 
 # PHP Session Settings
-php_value session.cookie_httponly 1
-php_value session.use_only_cookies 1
-
-# Configurar cookie_secure apenas em produção
-SetEnvIf Host "localhost|127\.0\.0\.1" DEVELOPMENT
-php_value session.cookie_secure 0
+<IfModule mod_php.c>
+    php_value session.cookie_httponly 1
+    php_value session.use_only_cookies 1
+    php_value session.cookie_secure 0
+</IfModule>
+<IfModule mod_php7.c>
+    php_value session.cookie_httponly 1
+    php_value session.use_only_cookies 1
+    php_value session.cookie_secure 0
+</IfModule>
 
 # Error Documents
 ErrorDocument 500 /error500.php
@@ -32,16 +43,16 @@ ErrorDocument 404 /error404.php
 # URL Rewriting
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /pdv_santissima_trindade/
+    RewriteBase /pdv/
     
-    # Remover 'checkout' da URL se presente
-    RewriteCond %{THE_REQUEST} /checkout/([^\s?]*) [NC]
-    RewriteRule ^ %1 [L,R=301,NE]
+    # Remover 'checkout' da URL se presente (comentado para evitar loop no localhost)
+    # RewriteCond %{THE_REQUEST} /checkout/([^\s?]*) [NC]
+    # RewriteRule ^ %1 [L,R=301,NE]
     
-    # Redirecionar internamente requisições para a pasta checkout
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ checkout/$1 [L]
+    # Redirecionar internamente requisições para a pasta checkout (comentado para evitar loop no localhost)
+    # RewriteCond %{REQUEST_FILENAME} !-f
+    # RewriteCond %{REQUEST_FILENAME} !-d
+    # RewriteRule ^(.*)$ checkout/$1 [L]
     
     # Redirect to HTTPS apenas em produção
     RewriteCond %{HTTP_HOST} !^localhost [NC]

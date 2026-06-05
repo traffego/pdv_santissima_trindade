@@ -5,10 +5,10 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 // Database configuration
-$host = '187.33.241.40';
-$user = 'platafo5_pdv';
-$password = 'kqtnJ9laxto.';
-$database = 'platafo5_pdv';
+$host = 'localhost';
+$user = 'u540810116_pdvtrind2';
+$password = 'Traffego444#';
+$database = 'u540810116_pdvtrind2';
 
 // Create connection with error handling
 try {

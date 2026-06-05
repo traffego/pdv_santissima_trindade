@@ -5,9 +5,14 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Check if user is logged in
+$base_path = '';
+if (strpos($_SERVER['SCRIPT_NAME'], '/produtos/') !== false) {
+    $base_path = '../';
+}
+
 if (!isset($_SESSION['usuario_id'])) {
     // User is not logged in, redirect to login page
-    header('Location: login.php');
+    header('Location: ' . $base_path . 'login.php');
     exit;
 }
 
@@ -17,7 +22,7 @@ if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 
     // Session expired
     session_unset();
     session_destroy();
-    header('Location: login.php?expired=1');
+    header('Location: ' . $base_path . 'login.php?expired=1');
     exit;
 }
 
